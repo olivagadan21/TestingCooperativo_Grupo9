@@ -40,7 +40,7 @@ public class PostController {
 			@RequestParam(value = "size", required = false, defaultValue = AppConstants.DEFAULT_PAGE_SIZE) Integer size) {
 		PagedResponse<Post> response = postService.getAllPosts(page, size);
 
-		return new ResponseEntity< >(response, HttpStatus.OK);
+		return new ResponseEntity<>(response, HttpStatus.OK);
 	}
 
 	@GetMapping("/category/{id}")

@@ -29,8 +29,39 @@ class CommentRepositoryTest {
     @Autowired
     PostRepository postRepository;
 
-    @Autowired
-    TestEntityManager testEntityManager;
-    
+
+    @Test
+    public void test_findByPostIdInComment() {
+        Post post = new Post();
+        post.setId(1L);
+        post.setBody("Esta post tiene un gran significado para mí");
+        post.setCreatedAt(Instant.now());
+        post.setUpdatedAt(Instant.now());
+        postRepository.save(post);
+
+        Comment comment = new Comment();
+        comment.setName("Comentario sobre mi viaje de fin de curso");
+        comment.setBody("Fuimos a Francia y fue una gran experiencia para mi vida");
+        comment.setEmail("barco@gmail.com");
+        comment.setCreatedAt(Instant.now());
+        comment.setUpdatedAt(Instant.now());
+        comment.setPost(post);
+        commentRepository.save(comment);
+
+        Page<Comment> pageComment = new PageImpl<>(Arrays.asList(comment));
+
+        Page<Comment> comments = commentRepository.findByPostId(1L, any(Pageable.class));
+
+        assertEquals(pageComment, comments);
+    }
+
+    @Test
+    public void test__findByPostIdNonExistingInComment() {
+
+        Page<Comment> comments = commentRepository.findByPostId(1L, any(Pageable.class));
+
+        assertEquals(0, comments.getTotalElements());
+    }
+
 
 }
