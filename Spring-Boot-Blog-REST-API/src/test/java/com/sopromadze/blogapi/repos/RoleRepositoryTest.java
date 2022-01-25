@@ -1,4 +1,4 @@
-package com.sopromadze.blogapi;
+package com.sopromadze.blogapi.repos;
 
 
 import com.sopromadze.blogapi.model.role.Role;
