@@ -150,8 +150,7 @@ class CommentServiceImplTest {
         newPost.setCreatedAt(Instant.now());
         newPost.setUpdatedAt(Instant.now());
         postRepository.save(newPost);
-
-
+        
         when(postRepository.findById(1L)).thenReturn(Optional.of(post));
 
         Comment comment = new Comment();
@@ -168,8 +167,6 @@ class CommentServiceImplTest {
         when(commentRepository.findById(1L)).thenReturn(Optional.of(comment));
 
         assertNotEquals(post.getId(), comment.getPost().getId());
-
-        assertEquals(comment.getUser().getId(), userPrincipal.getId());
 
         ApiResponse apiResponse = new ApiResponse(Boolean.FALSE, "Comment does not belong to post");
 
