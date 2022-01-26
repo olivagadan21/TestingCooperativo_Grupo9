@@ -28,7 +28,7 @@ public class TodoRepositoryTest {
     UserRepository userRepository;
 
     @Test
-    public void test_findByCreatedByInTodo() {
+    public void findByCreatedBy_success() {
 
         User user = new User();
         user.setId(1L);
@@ -52,7 +52,7 @@ public class TodoRepositoryTest {
     }
 
     @Test
-    public void test__findByCreatedByNonExistingInTodo() {
+    public void findByCreatedByNonExisting_success() {
 
         Page<Todo> todos = todoRepository.findByCreatedBy(1L, any(Pageable.class));
 

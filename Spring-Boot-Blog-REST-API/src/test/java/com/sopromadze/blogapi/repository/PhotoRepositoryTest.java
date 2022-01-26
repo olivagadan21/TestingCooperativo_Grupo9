@@ -28,7 +28,7 @@ public class PhotoRepositoryTest {
     AlbumRepository albumRepository;
 
     @Test
-    public void test_findByAlbumIdInPhoto() {
+    public void findByAlbumId_success() {
 
         Album album = new Album();
         album.setId(1L);
@@ -49,7 +49,7 @@ public class PhotoRepositoryTest {
     }
 
     @Test
-    public void test__findByAlbumIdNonExistingInComment() {
+    public void findByAlbumIdNonExisting_success() {
 
         Page<Photo> photos = photoRepository.findByAlbumId(1L, any(Pageable.class));
 
