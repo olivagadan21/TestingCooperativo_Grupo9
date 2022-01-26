@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -22,6 +23,7 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
 
 @DataJpaTest
 @ActiveProfiles("test")
@@ -31,7 +33,7 @@ public class AlbumRepositoryTest {
     @Autowired
     TestEntityManager testEntityManager;
 
-    @Autowired
+    @MockBean
     AlbumRepository albumRepository;
 
     @Test
@@ -41,24 +43,29 @@ public class AlbumRepositoryTest {
 
     @Test
     void findByCreatedBy_success() {
+
+        User user = new User();
+        user.setUsername("Vicente");
+        user.setFirstName("Rufo");
+        user.setLastName("Bruh");
+        user.setCreatedAt(Instant.now());
+
         Album album = new Album();
         album.setTitle("Álbum Reshulon");
+        album.setUser(user);
         album.setCreatedAt(Instant.now());
         album.setUpdatedAt(Instant.now());
 
         testEntityManager.persist(album);
 
-        List<Album> albums = Arrays.asList(album);
-
-        Pageable pageable = (Pageable) PageRequest.of(1,10);
-
-        User user = new User();
-        user.setUsername("Pepe");
-        user.setAlbums(albums);
-        user.setCreatedAt(Instant.now());
+        Page<Album> albums = new PageImpl<>(Arrays.asList(album));
 
 
-        assertNotEquals(0, albumRepository.findByCreatedBy(user.getId(), pageable).getTotalElements());
+        PageRequest pageRequest = PageRequest.of(1,10);
+
+        when(albumRepository.findByCreatedBy(user.getId(), pageRequest )).thenReturn(albums);
+
+        assertNotEquals(0, albumRepository.findByCreatedBy(user.getId(), pageRequest).getTotalElements());
     }
 
 }

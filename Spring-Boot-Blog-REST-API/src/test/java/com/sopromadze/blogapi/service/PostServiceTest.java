@@ -30,8 +30,7 @@ import static com.sopromadze.blogapi.utils.AppConstants.ID;
 import static com.sopromadze.blogapi.utils.AppConstants.POST;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
@@ -45,10 +44,6 @@ public class PostServiceTest {
 
     @Test
     void deletePost_success(){
-
-
-
-
         Role rol = new Role();
         rol.setName(RoleName.ROLE_ADMIN);
 
@@ -110,39 +105,42 @@ public class PostServiceTest {
         apiResponse.setSuccess(false);
         apiResponse.setMessage("You don't have permission to delete this post");
 
-
         assertThrows(resourceNotFoundException.getClass(), ()->postService.deletePost(2L, userPrincipal));
         //assertThrows(new UnauthorizedException(apiResponse).getClass(), ()->postService.deletePost(1L, userPrincipal));
     }
     @Test
     void deletePost_throwUnauthorizedException(){
 
-        Post post = new Post();
-        post.setId(1L);
-        post.setTitle("Post buenardo");
-
         Role rol = new Role();
         rol.setName(RoleName.ROLE_USER);
 
         List<Role> roles = Arrays.asList(rol);
 
+        Role rol2 = new Role();
+        rol.setName(RoleName.ROLE_ADMIN);
+
+        List<Role> roles2 = Arrays.asList(rol2);
+
         User user = new User();
-        user.setId(3L);
+        user.setId(2L);
         user.setRoles(roles);
 
-        UserPrincipal userPrincipal = UserPrincipal.builder()
-                .id(4L)
-                .authorities(user.getRoles().stream()
-                        .map(role -> new SimpleGrantedAuthority(role.getName().name())).collect(Collectors.toList()))
-                .build();
+        Post post = new Post();
+        post.setId(1L);
+        post.setTitle("Post buenardo");
 
-        ResourceNotFoundException resourceNotFoundException = new ResourceNotFoundException("aaa", "bbb", 1L);
+        User user2 = new User();
+        user2.setId(4L);
+        user2.setRoles(roles2);
+
+        UserPrincipal userPrincipal = UserPrincipal.create(user);
 
         ApiResponse apiResponse = new ApiResponse();
         apiResponse.setSuccess(false);
         apiResponse.setMessage("You don't have permission to delete this post");
 
-        when(postRepository.findById(any(Long.class))).thenReturn(Optional.of(post));
+        lenient().when(postRepository.findById(1L)).thenReturn(Optional.of(post));
+        System.out.println(postRepository.findById(1L));
         //assertThrows(resourceNotFoundException.getClass(), ()->postService.deletePost(2L, userPrincipal));
         assertThrows(new UnauthorizedException(apiResponse).getClass(), ()->postService.deletePost(1L, userPrincipal));
     }
