@@ -28,10 +28,10 @@ import static org.mockito.Mockito.when;
 public class CommentServiceTest {
 
     @Mock
-    CommentRepository commentRepository;
+    private CommentRepository commentRepository;
 
     @InjectMocks
-    CommentServiceImpl commentService;
+    private CommentServiceImpl commentService;
 
     @Test
     void getAllComments_success(){
