@@ -105,6 +105,8 @@ public class PostServiceTest {
         apiResponse.setSuccess(false);
         apiResponse.setMessage("You don't have permission to delete this post");
 
+        when(postRepository.findById(1L)).thenReturn(Optional.of(post));
+        when(postRepository.deleteById(1L)).thenReturn();
         assertThrows(resourceNotFoundException.getClass(), ()->postService.deletePost(2L, userPrincipal));
         //assertThrows(new UnauthorizedException(apiResponse).getClass(), ()->postService.deletePost(1L, userPrincipal));
     }

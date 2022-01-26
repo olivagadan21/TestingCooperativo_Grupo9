@@ -60,7 +60,6 @@ public class AlbumRepositoryTest {
 
         Page<Album> albums = new PageImpl<>(Arrays.asList(album));
 
-
         PageRequest pageRequest = PageRequest.of(1,10);
 
         when(albumRepository.findByCreatedBy(user.getId(), pageRequest )).thenReturn(albums);
