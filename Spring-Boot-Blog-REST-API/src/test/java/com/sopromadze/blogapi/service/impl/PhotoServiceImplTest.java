@@ -1,5 +1,6 @@
 package com.sopromadze.blogapi.service.impl;
 
+import com.sopromadze.blogapi.model.Album;
 import com.sopromadze.blogapi.model.Photo;
 import com.sopromadze.blogapi.model.role.Role;
 import com.sopromadze.blogapi.model.role.RoleName;
@@ -18,12 +19,14 @@ import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -40,20 +43,22 @@ public class PhotoServiceImplTest {
     private PhotoRepository photoRepository;
 
     @InjectMocks
-    private PhotoServiceImpl photoService;
+    PhotoServiceImpl photoService;
 
     @Test
     void getAllPhotos_success() {
+
+        Album album = new Album();
+        album.setId(1L);
+        album.setTitle("Viaje de fin de curso");
 
         Photo photo = new Photo();
         photo.setTitle("Torre Eiffel");
         photo.setUrl("https://media.tacdn.com/media/attractions-splice-spp-674x446/06/74/ab/3e.jpg");
         photo.setThumbnailUrl("https://www.toureiffel.paris/sites/default/files/styles/1200x675/public/actualite/image_principale/IMG_20200526_123909.jpg?itok=DeDSW4xL");
-        photoRepository.save(photo);
+        photo.setAlbum(album);
 
         Page<Photo> photoPage = new PageImpl<>(Arrays.asList(photo));
-
-        Page<Photo> photos = photoRepository.findAll(any(Pageable.class));
 
         PagedResponse<Photo> photoPagedResponse = new PagedResponse<>();
         photoPagedResponse.setContent(photoPage.getContent());
@@ -62,9 +67,11 @@ public class PhotoServiceImplTest {
         photoPagedResponse.setSize(1);
         photoPagedResponse.setTotalPages(1);
 
-        when(photos).thenReturn(photoPage);
+        Pageable pageable = PageRequest.of(1, 10);
 
-        assertEquals(photoPagedResponse, photoService.getAllPhotos(0, 10));
+        when(photoRepository.findByAlbumId(any(Long.class), any(Pageable.class))).thenReturn(photoPage);
+
+        assertEquals(photoPagedResponse, photoService.getAllPhotos(1, 10));
 
     }
 
@@ -111,18 +118,27 @@ public class PhotoServiceImplTest {
 
         UserPrincipal userPrincipal = UserPrincipal.create(user);
 
+        Album album = new Album();
+        album.setId(1L);
+        album.setTitle("Viaje de fin de curso");
+        album.setCreatedAt(Instant.now());
+        album.setUpdatedAt(Instant.now());
+        album.setUser(user);
+        albumRepository.save(album);
+
         Photo photo = new Photo();
         photo.setId(1L);
         photo.setTitle("Torre Eiffel");
         photo.setUrl("https://media.tacdn.com/media/attractions-splice-spp-674x446/06/74/ab/3e.jpg");
         photo.setThumbnailUrl("https://www.toureiffel.paris/sites/default/files/styles/1200x675/public/actualite/image_principale/IMG_20200526_123909.jpg?itok=DeDSW4xL");
+        photo.setAlbum(album);
         photoRepository.save(photo);
 
         when(photoRepository.findById(1L)).thenReturn(Optional.of(photo));
 
         assertEquals(photo.getAlbum().getUser().getId(), userPrincipal.getId());
 
-        ApiResponse apiResponse = new ApiResponse(Boolean.TRUE, "You successfully deleted photo");
+        ApiResponse apiResponse = new ApiResponse(Boolean.TRUE, "Photo deleted successfully");
 
         assertEquals(apiResponse, photoService.deletePhoto(1L, userPrincipal));
 
