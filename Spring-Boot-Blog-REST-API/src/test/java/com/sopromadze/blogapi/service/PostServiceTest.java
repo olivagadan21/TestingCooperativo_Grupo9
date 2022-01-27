@@ -91,7 +91,7 @@ public class PostServiceTest {
     }
 
     @Test
-    void deletePost_throwResourceNotFoundException(){
+    void deletePost_throwsResourceNotFoundException(){
 
         Post post = new Post();
         post.setId(1L);
@@ -124,7 +124,7 @@ public class PostServiceTest {
         //assertThrows(new UnauthorizedException(apiResponse).getClass(), ()->postService.deletePost(1L, userPrincipal));
     }
     @Test
-    void deletePost_throwUnauthorizedException(){
+    void deletePost_throwsUnauthorizedException(){
 
         Role rol = new Role();
         rol.setName(RoleName.ROLE_USER);
@@ -222,7 +222,7 @@ public class PostServiceTest {
     }
 
     @Test
-    void addPost_throwResourceNotFoundExceptionForUser(){
+    void addPost_throwsResourceNotFoundExceptionForUser(){
 
         Role rol = new Role();
         rol.setName(RoleName.ROLE_USER);
@@ -256,6 +256,45 @@ public class PostServiceTest {
         postRequest.setTags(tags);
 
         when(userRepository.findById(3L)).thenReturn(Optional.empty());
+        assertThrows(ResourceNotFoundException.class, ()->postService.addPost(postRequest, userPrincipal));
+    }
+
+    @Test
+    void addPost_throwsResourceNotFoundExceptionForCategory(){
+
+        Role rol = new Role();
+        rol.setName(RoleName.ROLE_USER);
+
+        List<Role> roles = Arrays.asList(rol);
+
+
+        User user = new User();
+        user.setId(1L);
+        user.setRoles(roles);
+
+        UserPrincipal userPrincipal = UserPrincipal.builder()
+                .id(user.getId())
+                .authorities(user.getRoles().stream()
+                        .map(role -> new SimpleGrantedAuthority(role.getName().name())).collect(Collectors.toList()))
+                .build();
+
+        Category category = new Category();
+        category.setId(2L);
+        category.setCreatedBy(user.getId());
+        category.setName("Categoría chula");
+
+        Tag tag = new Tag();
+        tag.setName("Tag bueno");
+
+        List<String> tags = Arrays.asList(tag.getName());
+
+        PostRequest postRequest = new PostRequest();
+        postRequest.setCategoryId(category.getId());
+        postRequest.setTitle("Post Buenardo");
+        postRequest.setTags(tags);
+
+        when(userRepository.findById(userPrincipal.getId())).thenReturn(Optional.of(user));
+        when(categoryRepository.findById(3L)).thenReturn(Optional.empty());
         assertThrows(ResourceNotFoundException.class, ()->postService.addPost(postRequest, userPrincipal));
     }
     
