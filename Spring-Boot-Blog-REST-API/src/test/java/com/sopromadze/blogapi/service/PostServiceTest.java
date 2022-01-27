@@ -99,14 +99,14 @@ public class PostServiceTest {
                         .map(role -> new SimpleGrantedAuthority(role.getName().name())).collect(Collectors.toList()))
                 .build();
 
-        ResourceNotFoundException resourceNotFoundException = new ResourceNotFoundException("aaa", "bbb", 1L);
+        ResourceNotFoundException resourceNotFoundException = new ResourceNotFoundException("aaa", "bbb", 2L);
 
         ApiResponse apiResponse = new ApiResponse();
         apiResponse.setSuccess(false);
         apiResponse.setMessage("You don't have permission to delete this post");
 
         when(postRepository.findById(1L)).thenReturn(Optional.of(post));
-        when(postRepository.deleteById(1L)).thenReturn();
+        doNothing().when(postRepository).deleteById(1L);
         assertThrows(resourceNotFoundException.getClass(), ()->postService.deletePost(2L, userPrincipal));
         //assertThrows(new UnauthorizedException(apiResponse).getClass(), ()->postService.deletePost(1L, userPrincipal));
     }
@@ -118,24 +118,24 @@ public class PostServiceTest {
 
         List<Role> roles = Arrays.asList(rol);
 
-        Role rol2 = new Role();
-        rol.setName(RoleName.ROLE_ADMIN);
-
-        List<Role> roles2 = Arrays.asList(rol2);
 
         User user = new User();
-        user.setId(2L);
+        user.setId(3L);
         user.setRoles(roles);
 
         Post post = new Post();
         post.setId(1L);
         post.setTitle("Post buenardo");
+        post.setUser(user);
+        post.setCreatedBy(3L);
 
-        User user2 = new User();
-        user2.setId(4L);
-        user2.setRoles(roles2);
 
-        UserPrincipal userPrincipal = UserPrincipal.create(user);
+
+        UserPrincipal userPrincipal = UserPrincipal.builder()
+                .id(4L)
+                .authorities(user.getRoles().stream()
+                        .map(role -> new SimpleGrantedAuthority(role.getName().name())).collect(Collectors.toList()))
+                .build();
 
         ApiResponse apiResponse = new ApiResponse();
         apiResponse.setSuccess(false);
@@ -144,7 +144,7 @@ public class PostServiceTest {
         lenient().when(postRepository.findById(1L)).thenReturn(Optional.of(post));
         System.out.println(postRepository.findById(1L));
         //assertThrows(resourceNotFoundException.getClass(), ()->postService.deletePost(2L, userPrincipal));
-        assertThrows(new UnauthorizedException(apiResponse).getClass(), ()->postService.deletePost(1L, userPrincipal));
+        assertThrows(UnauthorizedException.class, ()->postService.deletePost(1L, userPrincipal));
     }
 
 
