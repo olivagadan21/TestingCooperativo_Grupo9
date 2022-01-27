@@ -88,50 +88,7 @@ public class PhotosServiceTest {
         assertThrows(resourceNotFoundException.getClass(), ()->photoService.getPhoto(3L));
     }
 
-    @Test
-    void addPhoto_success(){
 
-        Role rol = new Role();
-        rol.setName(RoleName.ROLE_ADMIN);
-
-        List<Role> roles = Arrays.asList(rol);
-
-        User user = new User();
-        user.setId(2L);
-        user.setRoles(roles);
-
-        UserPrincipal userPrincipal = UserPrincipal.builder()
-                .id(user.getId())
-                .authorities(user.getRoles().stream()
-                        .map(role -> new SimpleGrantedAuthority(role.getName().name())).collect(Collectors.toList()))
-                .build();
-
-        Album album = new Album();
-        album.setTitle("Álbum Reshulon");
-        album.setId(1L);
-        album.setUser(user);
-        album.setCreatedAt(Instant.now());
-        album.setUpdatedAt(Instant.now());
-
-        PhotoRequest photoRequest = new PhotoRequest();
-        photoRequest.setTitle("Foto tremenda");
-        photoRequest.setUrl("https://foto");
-        photoRequest.setThumbnailUrl("https://fotochula");
-        photoRequest.setAlbumId(album.getId());
-
-        Photo photo = new Photo(photoRequest.getTitle(), photoRequest.getUrl(), photoRequest.getThumbnailUrl(),
-                album);
-
-        when(albumRepository.findById(photoRequest.getAlbumId())).thenReturn(Optional.of(album));
-        when(photoRepository.save(photo)).thenReturn(photo);
-        Photo photo1 = photoRepository.save(photo);
-        PhotoResponse photoResponse = new PhotoResponse(photo1.getId(), photo1.getTitle(), photo1.getUrl(),
-                photo1.getThumbnailUrl(), photo1.getAlbum().getId());
-        System.out.println(photo1.getTitle());
-        System.out.println(photoResponse);
-        assertEquals(photoResponse, photoService.addPhoto(photoRequest, userPrincipal));
-
-    }
 
 
 }
