@@ -1,12 +1,12 @@
 package com.sopromadze.blogapi.service.impl;
 
+import com.sopromadze.blogapi.exception.ResourceNotFoundException;
 import com.sopromadze.blogapi.exception.UnauthorizedException;
 import com.sopromadze.blogapi.model.Album;
 import com.sopromadze.blogapi.model.Photo;
 import com.sopromadze.blogapi.model.role.Role;
 import com.sopromadze.blogapi.model.role.RoleName;
 import com.sopromadze.blogapi.model.user.User;
-import com.sopromadze.blogapi.payload.ApiResponse;
 import com.sopromadze.blogapi.payload.PhotoRequest;
 import com.sopromadze.blogapi.payload.PhotoResponse;
 import com.sopromadze.blogapi.repository.AlbumRepository;
@@ -25,7 +25,6 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.when;
@@ -45,7 +44,7 @@ class PhotoServiceImplTest {
     PhotoServiceImpl photoService;
 
     @Test
-    void test_addPhoto() {
+    void addPhoto_success() {
 
         Role role = new Role();
         role.setId(1L);
@@ -66,7 +65,6 @@ class PhotoServiceImplTest {
         album.setId(1L);
         album.setTitle("Album photos");
         album.setUser(user);
-        albumRepository.save(album);
 
         PhotoRequest photoRequest = new PhotoRequest();
         photoRequest.setTitle("Solicitud de fotos");
@@ -80,10 +78,8 @@ class PhotoServiceImplTest {
 
         Photo photo = new Photo(photoRequest.getTitle(), photoRequest.getUrl(), photoRequest.getThumbnailUrl(),
                 album);
-        photoRepository.save(photo);
 
         when(photoRepository.save(photo)).thenReturn(photo);
-
 
         PhotoResponse photoResponse = new PhotoResponse(photo.getId(), photo.getTitle(), photo.getUrl(),
                 photo.getThumbnailUrl(), photo.getAlbum().getId());
@@ -93,8 +89,8 @@ class PhotoServiceImplTest {
 
     }
 
-   /* @Test
-    void test_addPhoto_when_albumUserId_isNotEquals_userId() {
+    @Test
+    void addPhoto_UnauthorizedException() {
 
         Role role = new Role();
         role.setId(1L);
@@ -114,9 +110,9 @@ class PhotoServiceImplTest {
         User segundoUsuario = new User();
         segundoUsuario.setId(2L);
         segundoUsuario.setUpdatedAt(Instant.now());
-        segundoUsuario.setEmail("jesus@gmail.com");
+        segundoUsuario.setEmail("luismi@gmail.com");
         segundoUsuario.setPassword("12345678");
-        segundoUsuario.setFirstName("Jesús");
+        segundoUsuario.setFirstName("Luis Miguel");
         segundoUsuario.setCreatedAt(Instant.now());
         segundoUsuario.setRoles(listRole);
 
@@ -124,7 +120,6 @@ class PhotoServiceImplTest {
         album.setId(1L);
         album.setTitle("Album photos");
         album.setUser(segundoUsuario);
-        albumRepository.save(album);
 
         PhotoRequest photoRequest = new PhotoRequest();
         photoRequest.setTitle("Solicitud de fotos");
@@ -133,23 +128,38 @@ class PhotoServiceImplTest {
         photoRequest.setAlbumId(1L);
 
         UserPrincipal userPrincipal = UserPrincipal.create(primerUsuario);
+
         when(albumRepository.findById(photoRequest.getAlbumId())).thenReturn(Optional.of(album));
 
-        Photo photo = new Photo(photoRequest.getTitle(), photoRequest.getUrl(), photoRequest.getThumbnailUrl(),
-                album);
-        photoRepository.save(photo);
-
-        when(photoRepository.save(photo)).thenReturn(photo);
-
-        assertNotEquals(album.getUser().getId(), primerUsuario.getId());
-
-        ApiResponse apiResponse = new ApiResponse(Boolean.FALSE, "You don't have permission to add photo in this album");
-
-        UnauthorizedException unauthorizedException = new UnauthorizedException(apiResponse);
-
-        assertEquals(unauthorizedException, photoService.addPhoto(photoRequest, userPrincipal));
+        assertThrows(UnauthorizedException.class, () -> photoService.addPhoto(photoRequest, userPrincipal));
 
     }
-*/
+
+    @Test
+    void addPhoto_when_albumIsEmpty () {
+        Role role = new Role();
+        role.setId(1L);
+        role.setName(RoleName.ROLE_ADMIN);
+        List<Role> listRole = new ArrayList<>();
+        listRole.add(role);
+
+        User user = new User();
+        user.setId(1L);
+        user.setUpdatedAt(Instant.now());
+        user.setEmail("jesus@gmail.com");
+        user.setPassword("12345678");
+        user.setFirstName("Jesús");
+        user.setCreatedAt(Instant.now());
+        user.setRoles(listRole);
+
+        PhotoRequest photoRequest = new PhotoRequest();
+
+        UserPrincipal userPrincipal = UserPrincipal.create(user);
+
+        when(albumRepository.findById(photoRequest.getAlbumId())).thenReturn(Optional.empty());
+
+        assertThrows(ResourceNotFoundException.class, () -> photoService.addPhoto(photoRequest, userPrincipal));
+    }
+
 
 }

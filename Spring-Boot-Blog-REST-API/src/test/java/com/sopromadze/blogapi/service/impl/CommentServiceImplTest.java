@@ -1,5 +1,7 @@
 package com.sopromadze.blogapi.service.impl;
 
+import com.sopromadze.blogapi.exception.BlogapiException;
+import com.sopromadze.blogapi.exception.ResourceNotFoundException;
 import com.sopromadze.blogapi.model.Comment;
 import com.sopromadze.blogapi.model.Post;
 import com.sopromadze.blogapi.model.role.Role;
@@ -39,13 +41,12 @@ class CommentServiceImplTest {
     CommentServiceImpl commentService;
 
     @Test
-    void test_findByCommentId() {
+    void getCommentId_success() {
         Post post = new Post();
         post.setId(1L);
         post.setBody("Esta post tiene un gran significado para mí");
         post.setCreatedAt(Instant.now());
         post.setUpdatedAt(Instant.now());
-        postRepository.save(post);
 
         when(postRepository.findById(1L)).thenReturn(Optional.of(post));
 
@@ -57,7 +58,7 @@ class CommentServiceImplTest {
         comment.setCreatedAt(Instant.now());
         comment.setUpdatedAt(Instant.now());
         comment.setPost(post);
-        commentRepository.save(comment);
+
 
         when(commentRepository.findById(1L)).thenReturn(Optional.of(comment));
 
@@ -66,8 +67,60 @@ class CommentServiceImplTest {
     }
 
     @Test
-    void test_deleteComment() {
+    void getCommentId_exception (){
+        Post post = new Post();
+        post.setId(1L);
+        post.setBody("Esta post tiene un gran significado para mí");
+        post.setCreatedAt(Instant.now());
+        post.setUpdatedAt(Instant.now());
 
+        Post post1 = new Post();
+        post1.setId(2L);
+        post1.setBody("Esta post tiene un gran significado para mí");
+        post1.setCreatedAt(Instant.now());
+        post1.setUpdatedAt(Instant.now());
+
+        Comment comment = new Comment();
+        comment.setId(1L);
+        comment.setName("Comentario sobre mi viaje de fin de curso");
+        comment.setBody("Fuimos a Francia y fue una gran experiencia para mi vida");
+        comment.setEmail("barco@gmail.com");
+        comment.setCreatedAt(Instant.now());
+        comment.setUpdatedAt(Instant.now());
+        comment.setPost(post1);
+
+        when(postRepository.findById(1L)).thenReturn(Optional.of(post));
+        when(commentRepository.findById(1L)).thenReturn(Optional.of(comment));
+
+        assertNotEquals(post.getId(), comment.getPost().getId());
+        assertThrows(BlogapiException.class, () -> commentService.getComment(1L, 1L));
+
+    }
+
+    @Test
+    void getCommentId_postIdNotFound_ResourceNotFoundException() {
+
+        when(postRepository.findById(1L)).thenReturn(Optional.empty());
+
+        assertThrows(ResourceNotFoundException.class, () -> commentService.getComment(1L, 1L));
+    }
+
+    @Test
+    void getCommentId_commentIdNotFound_ResourceNotFoundException() {
+
+        Post post1 = new Post();
+        post1.setId(2L);
+        post1.setBody("Esta post tiene un gran significado para mí");
+        post1.setCreatedAt(Instant.now());
+        post1.setUpdatedAt(Instant.now());
+
+        when(commentRepository.findById(1L)).thenReturn(Optional.empty());
+
+        assertThrows(ResourceNotFoundException.class, () -> commentService.getComment(1L, 1L));
+    }
+
+    @Test
+    void deleteComment_success() {
         Role role = new Role();
         role.setId(1L);
         role.setName(RoleName.ROLE_ADMIN);
@@ -90,7 +143,7 @@ class CommentServiceImplTest {
         post.setBody("Esta post tiene un gran significado para mí");
         post.setCreatedAt(Instant.now());
         post.setUpdatedAt(Instant.now());
-        postRepository.save(post);
+
 
         when(postRepository.findById(1L)).thenReturn(Optional.of(post));
 
@@ -103,7 +156,7 @@ class CommentServiceImplTest {
         comment.setUpdatedAt(Instant.now());
         comment.setPost(post);
         comment.setUser(user);
-        commentRepository.save(comment);
+
 
         when(commentRepository.findById(1L)).thenReturn(Optional.of(comment));
 
@@ -142,15 +195,14 @@ class CommentServiceImplTest {
         post.setBody("Esta post tiene un gran significado para mí");
         post.setCreatedAt(Instant.now());
         post.setUpdatedAt(Instant.now());
-        postRepository.save(post);
+
 
         Post newPost = new Post();
         newPost.setId(2L);
         newPost.setBody("Esta post tiene un gran significado para mí");
         newPost.setCreatedAt(Instant.now());
         newPost.setUpdatedAt(Instant.now());
-        postRepository.save(newPost);
-        
+
         when(postRepository.findById(1L)).thenReturn(Optional.of(post));
 
         Comment comment = new Comment();
@@ -162,7 +214,7 @@ class CommentServiceImplTest {
         comment.setUpdatedAt(Instant.now());
         comment.setPost(newPost);
         comment.setUser(user);
-        commentRepository.save(comment);
+
 
         when(commentRepository.findById(1L)).thenReturn(Optional.of(comment));
 
@@ -174,21 +226,42 @@ class CommentServiceImplTest {
 
     }
 
-   /* @Test
-    void test_findByCommentId_exception (){
+   @Test
+    void deleteComment_BlogApiException() {
+        Role role = new Role();
+        role.setId(1L);
+        role.setName(RoleName.ROLE_USER);
+        List<Role> listRole = new ArrayList<>();
+        listRole.add(role);
+
+        User user = new User();
+        user.setId(1L);
+        user.setUpdatedAt(Instant.now());
+        user.setEmail("jesus@gmail.com");
+        user.setPassword("12345678");
+        user.setFirstName("Jesús");
+        user.setCreatedAt(Instant.now());
+        user.setRoles(listRole);
+
+        User newUser = new User();
+        newUser.setId(2L);
+        newUser.setUpdatedAt(Instant.now());
+        newUser.setEmail("jesus@gmail.com");
+        newUser.setPassword("12345678");
+        newUser.setFirstName("Jesús");
+        newUser.setCreatedAt(Instant.now());
+        newUser.setRoles(listRole);
+
+        UserPrincipal userPrincipal = UserPrincipal.create(user);
+
         Post post = new Post();
         post.setId(1L);
         post.setBody("Esta post tiene un gran significado para mí");
         post.setCreatedAt(Instant.now());
         post.setUpdatedAt(Instant.now());
-        postRepository.save(post);
 
-        Post post1 = new Post();
-        post1.setId(2L);
-        post1.setBody("Esta post tiene un gran significado para mí");
-        post1.setCreatedAt(Instant.now());
-        post1.setUpdatedAt(Instant.now());
-        postRepository.save(post1);
+
+        when(postRepository.findById(1L)).thenReturn(Optional.of(post));
 
         Comment comment = new Comment();
         comment.setId(1L);
@@ -197,15 +270,41 @@ class CommentServiceImplTest {
         comment.setEmail("barco@gmail.com");
         comment.setCreatedAt(Instant.now());
         comment.setUpdatedAt(Instant.now());
-        comment.setPost(post1);
-        commentRepository.save(comment);
+        comment.setPost(post);
+        comment.setUser(newUser);
 
-        when(postRepository.findById(1L)).thenReturn(Optional.of(post));
         when(commentRepository.findById(1L)).thenReturn(Optional.of(comment));
 
-        assertNotEquals(post.getId(), comment.getPost().getId());
-        BlogapiException blogapiException = new BlogapiException(HttpStatus.BAD_REQUEST, "Comment does not belong to post");
-        assertEquals(blogapiException,commentService.getComment(1L,1L));
-    }*/
+        assertEquals(post.getId(), comment.getPost().getId());
+        assertNotEquals(comment.getUser().getId(),userPrincipal.getId());
+
+        assertThrows(BlogapiException.class, () -> commentService.deleteComment(1L,1L,userPrincipal));
+    }
+
+    @Test
+    void deleteComment_postIdNonExists_ResourceNotFoundException(){
+
+        Role role = new Role();
+        role.setId(1L);
+        role.setName(RoleName.ROLE_USER);
+        List<Role> listRole = new ArrayList<>();
+        listRole.add(role);
+
+        User user = new User();
+        user.setId(1L);
+        user.setUpdatedAt(Instant.now());
+        user.setEmail("jesus@gmail.com");
+        user.setPassword("12345678");
+        user.setFirstName("Jesús");
+        user.setCreatedAt(Instant.now());
+        user.setRoles(listRole);
+
+        UserPrincipal userPrincipal = UserPrincipal.create(user);
+        when(postRepository.findById(1L)).thenReturn(Optional.empty());
+
+        assertThrows(ResourceNotFoundException.class, () -> commentService.deleteComment(1L, 1L,userPrincipal));
+    }
+
+
 
 }

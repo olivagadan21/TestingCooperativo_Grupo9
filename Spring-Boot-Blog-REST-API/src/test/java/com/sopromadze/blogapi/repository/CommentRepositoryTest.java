@@ -30,14 +30,23 @@ class CommentRepositoryTest {
     PostRepository postRepository;
 
 
+    @Autowired
+    private TestEntityManager testEntityManager;
+
     @Test
-    public void test_findByPostIdInComment() {
+    void testRepoNotNull() {
+        assertNotNull(commentRepository);
+        assertNotNull(postRepository);
+    }
+
+
+    @Test
+    public void findByPostIdInComment_success() {
         Post post = new Post();
-        post.setId(1L);
         post.setBody("Esta post tiene un gran significado para mí");
         post.setCreatedAt(Instant.now());
         post.setUpdatedAt(Instant.now());
-        postRepository.save(post);
+        testEntityManager.persist(post);
 
         Comment comment = new Comment();
         comment.setName("Comentario sobre mi viaje de fin de curso");
@@ -46,7 +55,7 @@ class CommentRepositoryTest {
         comment.setCreatedAt(Instant.now());
         comment.setUpdatedAt(Instant.now());
         comment.setPost(post);
-        commentRepository.save(comment);
+        testEntityManager.persist(comment);
 
         Page<Comment> pageComment = new PageImpl<>(Arrays.asList(comment));
 
@@ -56,8 +65,7 @@ class CommentRepositoryTest {
     }
 
     @Test
-    public void test__findByPostIdNonExistingInComment() {
-
+    public void findByPostIdNonExistingInComment() {
         Page<Comment> comments = commentRepository.findByPostId(1L, any(Pageable.class));
 
         assertEquals(0, comments.getTotalElements());
