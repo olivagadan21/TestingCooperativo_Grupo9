@@ -9,6 +9,7 @@ import com.sopromadze.blogapi.model.role.Role;
 import com.sopromadze.blogapi.model.role.RoleName;
 import com.sopromadze.blogapi.model.user.User;
 import com.sopromadze.blogapi.payload.ApiResponse;
+import com.sopromadze.blogapi.payload.PagedResponse;
 import com.sopromadze.blogapi.payload.PostRequest;
 import com.sopromadze.blogapi.payload.PostResponse;
 import com.sopromadze.blogapi.security.UserPrincipal;
@@ -22,20 +23,23 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.time.Instant;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static org.hamcrest.Matchers.hasSize;
 import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @AutoConfigureMockMvc
 @Log
@@ -65,6 +69,7 @@ public class PostControllerTest {
     private Category category;
     private Tag tag;
     private PostResponse postResponse;
+    private PagedResponse<Post> pagedResponse;
 
     @BeforeEach
     void initData() {
@@ -147,6 +152,19 @@ public class PostControllerTest {
         postResponse.setCategory(post2.getCategory().getName());
         postResponse.setTags(tags);
 
+        Page<Post> posts = new PageImpl<>(List.of(post2));
+
+
+        List<Post> content = posts.getNumberOfElements() == 0 ? Collections.emptyList() : posts.getContent();
+
+
+        pagedResponse = new PagedResponse<>();
+        pagedResponse.setContent(content);
+        pagedResponse.setTotalPages(1);
+        pagedResponse.setSize(1);
+        pagedResponse.setTotalElements(1);
+        pagedResponse.setLast(true);
+
 
 
     }
@@ -200,6 +218,20 @@ public class PostControllerTest {
                         .content(objectMapper.writeValueAsString(postRequest))
                         .contentType("application/json"))
                 .andExpect(status().isUnauthorized()).andDo(print());
+    }
+
+    @Test
+    void whenGetPostsByCategory_returns200() throws Exception {
+
+        when(postServiceImpl.getPostsByCategory(category.getId(), 1, 10)).thenReturn(pagedResponse);
+        mockMvc.perform(get("/api/posts/category/{id}", 2L)
+                        .param("page", String.valueOf(1))
+                        .param("size", String.valueOf(10))
+                        .contentType("application/json"))
+                .andExpect(jsonPath("$.content", hasSize(1)))
+                .andExpect(content().json(objectMapper.writeValueAsString(pagedResponse)))
+                .andExpect(status().isOk()).andDo(print());
+
     }
 
 }

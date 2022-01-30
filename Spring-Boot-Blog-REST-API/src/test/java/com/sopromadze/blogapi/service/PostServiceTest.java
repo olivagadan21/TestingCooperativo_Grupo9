@@ -20,18 +20,15 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
+import org.springframework.data.domain.*;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
 import java.time.Instant;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
-import static com.sopromadze.blogapi.utils.AppConstants.ID;
-import static com.sopromadze.blogapi.utils.AppConstants.POST;
+import static com.sopromadze.blogapi.utils.AppConstants.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
@@ -297,6 +294,79 @@ public class PostServiceTest {
         when(categoryRepository.findById(3L)).thenReturn(Optional.empty());
         assertThrows(ResourceNotFoundException.class, ()->postService.addPost(postRequest, userPrincipal));
     }
+
+    @Test
+    void getPostByCategory_success(){
+
+        Role rol = new Role();
+        rol.setName(RoleName.ROLE_USER);
+
+        List<Role> roles = Arrays.asList(rol);
+
+
+        User user = new User();
+        user.setId(1L);
+        user.setRoles(roles);
+
+
+        Category category = new Category();
+        category.setId(2L);
+        category.setCreatedBy(user.getId());
+        category.setName("Categoría chula");
+        category.setCreatedAt(Instant.now());
+
+
+        Post post = new Post();
+        post.setId(3L);
+        post.setUser(user);
+        post.setTitle("Post buenardo");
+        post.setCategory(category);
+
+        Page<Post> posts = new PageImpl<>(List.of(post));
+
+        Pageable pageable = PageRequest.of(1, 1, Sort.Direction.DESC, CREATED_AT);
+
+        List<Post> content = posts.getNumberOfElements() == 0 ? Collections.emptyList() : posts.getContent();
+
+        PagedResponse<Post> result = new PagedResponse<>();
+        result.setContent(content);
+        result.setTotalPages(1);
+        result.setSize(1);
+        result.setTotalElements(1);
+        result.setLast(true);
+
+
+        when(categoryRepository.findById(category.getId())).thenReturn(Optional.of(category));
+        when(postRepository.findByCategory(category.getId(), pageable)).thenReturn(posts);
+        assertEquals(result, postService.getPostsByCategory(category.getId(), 1, 1));
+
+    }
+
+    @Test
+    void getPostByCategory_throwsResourceNotFoundExceptionForCategory(){
+
+        Role rol = new Role();
+        rol.setName(RoleName.ROLE_USER);
+
+        List<Role> roles = Arrays.asList(rol);
+
+        User user = new User();
+        user.setId(1L);
+        user.setRoles(roles);
+
+        Category category = new Category();
+        category.setId(2L);
+        category.setCreatedBy(user.getId());
+        category.setName("Categoría chula");
+        category.setCreatedAt(Instant.now());
+
+
+        when(categoryRepository.findById(3L)).thenReturn(Optional.empty());
+        assertThrows(ResourceNotFoundException.class, ()->postService.getPostsByCategory(3L, 1, 1));
+
+    }
+
+
     
 
 

@@ -41,9 +41,9 @@ public class CommentControllerTest {
     @MockBean
     CommentServiceImpl commentService;
 
-    Post post1;
-    Page<Comment> resultado;
-    PagedResponse<Comment> pagedResponse;
+    private Post post1;
+    private Page<Comment> resultado;
+    private PagedResponse<Comment> pagedResponse;
 
     @BeforeEach
     void initData(){
