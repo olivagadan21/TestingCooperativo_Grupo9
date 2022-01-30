@@ -1,5 +1,6 @@
 package com.sopromadze.blogapi.service.impl;
 
+import com.sopromadze.blogapi.exception.ResourceNotFoundException;
 import com.sopromadze.blogapi.model.Album;
 import com.sopromadze.blogapi.model.Photo;
 import com.sopromadze.blogapi.model.role.Role;
@@ -7,6 +8,7 @@ import com.sopromadze.blogapi.model.role.RoleName;
 import com.sopromadze.blogapi.model.user.User;
 import com.sopromadze.blogapi.payload.ApiResponse;
 import com.sopromadze.blogapi.payload.PagedResponse;
+import com.sopromadze.blogapi.payload.PhotoResponse;
 import com.sopromadze.blogapi.repository.AlbumRepository;
 import com.sopromadze.blogapi.repository.PhotoRepository;
 import com.sopromadze.blogapi.security.UserPrincipal;
@@ -21,8 +23,10 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
@@ -53,25 +57,23 @@ public class PhotoServiceImplTest {
         album.setTitle("Viaje de fin de curso");
 
         Photo photo = new Photo();
+        photo.setId(1L);
         photo.setTitle("Torre Eiffel");
         photo.setUrl("https://media.tacdn.com/media/attractions-splice-spp-674x446/06/74/ab/3e.jpg");
         photo.setThumbnailUrl("https://www.toureiffel.paris/sites/default/files/styles/1200x675/public/actualite/image_principale/IMG_20200526_123909.jpg?itok=DeDSW4xL");
         photo.setAlbum(album);
 
         Page<Photo> photoPage = new PageImpl<>(Arrays.asList(photo));
+        Page<Photo> photos = photoRepository.findAll(any(Pageable.class));
 
-        PagedResponse<Photo> photoPagedResponse = new PagedResponse<>();
-        photoPagedResponse.setContent(photoPage.getContent());
-        photoPagedResponse.setTotalElements(1);
-        photoPagedResponse.setLast(true);
-        photoPagedResponse.setSize(1);
-        photoPagedResponse.setTotalPages(1);
+        PhotoResponse photoResponse = new PhotoResponse(photo.getId(), photo.getTitle(), photo.getUrl(), photo.getThumbnailUrl(), photo.getAlbum().getId());
 
-        Pageable pageable = PageRequest.of(1, 10);
+        List<PhotoResponse> photoResponses = new ArrayList<>();
+        photoResponses.add(photoResponse);
 
-        when(photoRepository.findByAlbumId(any(Long.class), any(Pageable.class))).thenReturn(photoPage);
+        when(photos).thenReturn(photoPage);
 
-        assertEquals(photoPagedResponse, photoService.getAllPhotos(1, 10));
+        assertEquals(photoResponses, photoService.getAllPhotos(0, 10).getContent());
 
     }
 
@@ -90,7 +92,6 @@ public class PhotoServiceImplTest {
         when(photos).thenReturn(photoPage);
 
         assertEquals(postPagedResponse, photoService.getAllPhotos(0, 10));
-
 
     }
 
@@ -140,12 +141,13 @@ public class PhotoServiceImplTest {
 
         ApiResponse apiResponse = new ApiResponse(Boolean.TRUE, "Photo deleted successfully");
 
+        assertEquals(true,userPrincipal.getAuthorities().contains(new SimpleGrantedAuthority(RoleName.ROLE_ADMIN.toString())));
         assertEquals(apiResponse, photoService.deletePhoto(1L, userPrincipal));
 
     }
 
     @Test
-    void deletePhotoWhenPhotoIdDoesNotExist_success() {
+    void deletePhoto_ResourceNotFoundException_success() {
 
         Role admin = new Role();
         admin.setId(1L);
@@ -168,9 +170,27 @@ public class PhotoServiceImplTest {
 
         UserPrincipal userPrincipal = UserPrincipal.create(user);
 
+        Album album = new Album();
+        album.setId(1L);
+        album.setTitle("Viaje de fin de curso");
+        album.setCreatedAt(Instant.now());
+        album.setUpdatedAt(Instant.now());
+        album.setUser(user);
+        albumRepository.save(album);
+
+        Photo photo = new Photo();
+        photo.setId(1L);
+        photo.setTitle("Torre Eiffel");
+        photo.setUrl("https://media.tacdn.com/media/attractions-splice-spp-674x446/06/74/ab/3e.jpg");
+        photo.setThumbnailUrl("https://www.toureiffel.paris/sites/default/files/styles/1200x675/public/actualite/image_principale/IMG_20200526_123909.jpg?itok=DeDSW4xL");
+        photo.setAlbum(album);
+        photoRepository.save(photo);
+
         ApiResponse apiResponse = new ApiResponse(Boolean.FALSE, "Photo does not exist");
 
-        assertEquals(apiResponse, photoService.deletePhoto(1L, userPrincipal));
+        when(photoRepository.findById(2L)).thenReturn(Optional.of(photo));
+
+        assertThrows(ResourceNotFoundException.class, ()-> photoService.deletePhoto(1L, userPrincipal));
 
     }
 
