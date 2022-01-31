@@ -80,25 +80,3 @@ public class CategoryServiceImpl implements CategoryService {
 		throw new UnauthorizedException("You don't have permission to delete this category");
 	}
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

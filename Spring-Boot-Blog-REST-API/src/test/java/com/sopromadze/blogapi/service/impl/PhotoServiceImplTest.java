@@ -4,14 +4,18 @@ import com.sopromadze.blogapi.exception.ResourceNotFoundException;
 import com.sopromadze.blogapi.exception.UnauthorizedException;
 import com.sopromadze.blogapi.model.Album;
 import com.sopromadze.blogapi.model.Photo;
+import com.sopromadze.blogapi.model.Post;
 import com.sopromadze.blogapi.model.role.Role;
 import com.sopromadze.blogapi.model.role.RoleName;
 import com.sopromadze.blogapi.model.user.User;
+import com.sopromadze.blogapi.payload.PagedResponse;
 import com.sopromadze.blogapi.payload.PhotoRequest;
 import com.sopromadze.blogapi.payload.PhotoResponse;
 import com.sopromadze.blogapi.repository.AlbumRepository;
 import com.sopromadze.blogapi.repository.PhotoRepository;
 import com.sopromadze.blogapi.security.UserPrincipal;
+import com.sopromadze.blogapi.utils.AppConstants;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -19,14 +23,18 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
+import org.mockito.stubbing.Answer;
+import org.springframework.data.domain.*;
 
 
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -44,8 +52,8 @@ class PhotoServiceImplTest {
     PhotoServiceImpl photoService;
 
     @Test
+    @DisplayName("Add photo")
     void addPhoto_success() {
-
         Role role = new Role();
         role.setId(1L);
         role.setName(RoleName.ROLE_ADMIN);
@@ -72,24 +80,23 @@ class PhotoServiceImplTest {
         photoRequest.setThumbnailUrl("https://photoRequest");
         photoRequest.setAlbumId(1L);
 
-        when(albumRepository.findById(photoRequest.getAlbumId())).thenReturn(Optional.of(album));
-
         UserPrincipal userPrincipal = UserPrincipal.create(user);
 
         Photo photo = new Photo(photoRequest.getTitle(), photoRequest.getUrl(), photoRequest.getThumbnailUrl(),
                 album);
 
-        when(photoRepository.save(photo)).thenReturn(photo);
-
         PhotoResponse photoResponse = new PhotoResponse(photo.getId(), photo.getTitle(), photo.getUrl(),
                 photo.getThumbnailUrl(), photo.getAlbum().getId());
 
+        when(albumRepository.findById(photoRequest.getAlbumId())).thenReturn(Optional.of(album));
+        when(photoRepository.save(photo)).thenReturn(photo);
         assertEquals(album.getUser().getId(), user.getId());
         assertEquals(photoResponse, photoService.addPhoto(photoRequest, userPrincipal));
 
     }
 
     @Test
+    @DisplayName("Add photo unauthorizedException ")
     void addPhoto_UnauthorizedException() {
 
         Role role = new Role();
@@ -136,6 +143,7 @@ class PhotoServiceImplTest {
     }
 
     @Test
+    @DisplayName("Add photo, album is empty")
     void addPhoto_when_albumIsEmpty () {
         Role role = new Role();
         role.setId(1L);
@@ -160,6 +168,67 @@ class PhotoServiceImplTest {
 
         assertThrows(ResourceNotFoundException.class, () -> photoService.addPhoto(photoRequest, userPrincipal));
     }
+
+
+    @Test
+    @DisplayName("Get all photos by album")
+    void getAllPhotosByAlbum_success() {
+
+        Album album = new Album();
+        album.setId(1L);
+
+        Photo photo = new Photo();
+        photo.setId(1L);
+        photo.setTitle("Mi foto en la playa");
+        photo.setAlbum(album);
+
+        Page<Photo> photoPage = new PageImpl<>(Arrays.asList(photo));
+
+        PhotoResponse photoResponse = new PhotoResponse(photo.getId(), photo.getTitle(), photo.getUrl(),
+                photo.getThumbnailUrl(), photo.getAlbum().getId());
+
+        List<PhotoResponse> photoResponses = new ArrayList<>();
+        photoResponses.add(photoResponse);
+
+        PagedResponse postPagedResponse =new PagedResponse<>(photoResponses, photoPage.getNumber(), photoPage.getSize(), photoPage.getTotalElements(),
+                photoPage.getTotalPages(), photoPage.isLast());
+
+        Pageable pageable = PageRequest.of(1, 1, Sort.Direction.DESC, AppConstants.CREATED_AT);
+
+        when(photoRepository.findByAlbumId(1L, pageable)).thenReturn(photoPage);
+        assertEquals(postPagedResponse,photoService.getAllPhotosByAlbum(1L,1,1));
+    }
+
+    @Test
+    @DisplayName("Get all photos by album, album is empty")
+    void getAllPhotosByAlbum_whenAlbumIsEmpty() {
+
+        Album album = new Album();
+        album.setId(1L);
+
+        Photo photo = new Photo();
+        photo.setId(1L);
+        photo.setTitle("Mi foto en la playa");
+        photo.setAlbum(album);
+
+        Page<Photo> photoPage = new PageImpl<>(Arrays.asList());
+
+        PhotoResponse photoResponse = new PhotoResponse(photo.getId(), photo.getTitle(), photo.getUrl(),
+                photo.getThumbnailUrl(), photo.getAlbum().getId());
+
+        List<PhotoResponse> photoResponses = new ArrayList<>();
+        photoResponses.add(photoResponse);
+
+        PagedResponse postPagedResponse =new PagedResponse<>(photoResponses, photoPage.getNumber(), photoPage.getSize(), photoPage.getTotalElements(),
+                photoPage.getTotalPages(), photoPage.isLast());
+
+        Pageable pageable = PageRequest.of(1, 1, Sort.Direction.DESC, AppConstants.CREATED_AT);
+
+        when(photoRepository.findByAlbumId(1L, pageable)).thenReturn(photoPage);
+        assertEquals(0,photoService.getAllPhotosByAlbum(1L,1,1).getTotalElements());
+    }
+
+
 
 
 }

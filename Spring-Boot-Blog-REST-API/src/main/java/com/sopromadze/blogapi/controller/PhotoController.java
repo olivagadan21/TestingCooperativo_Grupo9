@@ -46,7 +46,7 @@ public class PhotoController {
 			@CurrentUser UserPrincipal currentUser) {
 		PhotoResponse photoResponse = photoService.addPhoto(photoRequest, currentUser);
 
-		return new ResponseEntity< >(photoResponse, HttpStatus.OK);
+		return new ResponseEntity< >(photoResponse, HttpStatus.CREATED);
 	}
 
 	@GetMapping("/{id}")

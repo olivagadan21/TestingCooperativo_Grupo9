@@ -76,6 +76,8 @@ public class CommentController {
 	public ResponseEntity<ApiResponse> deleteComment(@PathVariable(name = "postId") Long postId,
 			@PathVariable(name = "id") Long id, @CurrentUser UserPrincipal currentUser) {
 
+
+
 		ApiResponse response = commentService.deleteComment(postId, id, currentUser);
 
 		HttpStatus status = response.getSuccess() ? HttpStatus.OK : HttpStatus.BAD_REQUEST;

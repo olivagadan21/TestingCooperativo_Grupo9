@@ -85,7 +85,7 @@ public class PostController {
 			@Valid @RequestBody PostRequest newPostRequest, @CurrentUser UserPrincipal currentUser) {
 		Post post = postService.updatePost(id, newPostRequest, currentUser);
 
-		return new ResponseEntity< >(post, HttpStatus.OK);
+		return new ResponseEntity<>(post, HttpStatus.OK);
 	}
 
 	@DeleteMapping("/{id}")
