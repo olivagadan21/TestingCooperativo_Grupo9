@@ -37,7 +37,7 @@ class CategoryServiceImplTest {
     CategoryServiceImpl categoryService;
 
     @Test
-    void getCategory_access() {
+    void getCategory_success() {
 
         Category category = new Category();
         category.setId(1L);
@@ -50,7 +50,7 @@ class CategoryServiceImplTest {
     }
 
     @Test
-    void getCategory_ResourceNotFoundException_access() {
+    void getCategory_ResourceNotFoundException_success() {
 
         Category category = new Category();
         category.setId(1L);
@@ -63,7 +63,7 @@ class CategoryServiceImplTest {
     }
 
     @Test
-    void deleteCategory_access() {
+    void deleteCategory_success() {
 
         Role admin = new Role();
         admin.setId(1L);
@@ -97,7 +97,7 @@ class CategoryServiceImplTest {
     }
 
     @Test
-    void deleteCategory_ResourceNotFoundException_access() {
+    void deleteCategory_ResourceNotFoundException_success() {
 
         Role admin = new Role();
         admin.setId(1L);

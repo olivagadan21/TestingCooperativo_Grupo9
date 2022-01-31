@@ -1,5 +1,6 @@
 package com.sopromadze.blogapi.service.impl;
 
+import com.sopromadze.blogapi.exception.BlogapiException;
 import com.sopromadze.blogapi.exception.ResourceNotFoundException;
 import com.sopromadze.blogapi.model.Album;
 import com.sopromadze.blogapi.model.role.Role;
@@ -49,7 +50,7 @@ class AlbumServiceImplTest {
     AlbumServiceImpl albumService;
 
     @Test
-    void addAlbum_access() {
+    void addAlbum_success() {
 
         Role rol = new Role();
         rol.setName(RoleName.ROLE_ADMIN);
@@ -85,9 +86,7 @@ class AlbumServiceImplTest {
     }
 
     @Test
-    void updateAlbum_access() {
-
-        //SIN TERMINAR
+    void updateAlbum_success() {
 
         Role rol = new Role();
         rol.setId(1L);
@@ -136,7 +135,112 @@ class AlbumServiceImplTest {
     }
 
     @Test
-    void deleteAlbum_access() {
+    void updateAlbum_ResourceNotFoundException_success() {
+
+        Role rol = new Role();
+        rol.setId(1L);
+        rol.setName(RoleName.ROLE_ADMIN);
+
+        List<Role> roleList = Arrays.asList(rol);
+
+        User user = new User();
+        user.setId(1L);
+        user.setEmail("danieloliva@gmail.com");
+        user.setPassword("12345678");
+        user.setFirstName("Daniel");
+        user.setLastName("Oliva");
+        user.setRoles(roleList);
+
+        UserPrincipal userPrincipal = UserPrincipal.create(user);
+
+        when(userRepository.getUser(userPrincipal)).thenReturn(user);
+
+        Album album = new Album();
+        album.setId(1L);
+        album.setTitle("Viaje a Francia.");
+        album.setUser(user);
+
+        AlbumRequest albumRequest = new AlbumRequest();
+        albumRequest.setId(album.getId());
+        albumRequest.setTitle("Viaje a París");
+        albumRequest.setUser(user);
+
+        Album updated = new Album();
+        updated.setId(album.getId());
+        updated.setTitle(albumRequest.getTitle());
+        updated.setUser(albumRequest.getUser());
+
+        AlbumResponse albumResponse = new AlbumResponse();
+        albumResponse.setId(updated.getId());
+        albumResponse.setTitle(updated.getTitle());
+        albumResponse.setUser(updated.getUser());
+
+        when(albumRepository.findById(2L)).thenReturn(Optional.of(album));
+
+        assertThrows(ResourceNotFoundException.class, () -> albumService.updateAlbum(album.getId(),albumRequest, userPrincipal).getBody());
+
+    }
+
+    @Test
+    void updateAlbum_BlogapiException_success() {
+
+        Role rol = new Role();
+        rol.setId(1L);
+        rol.setName(RoleName.ROLE_USER);
+
+        List<Role> roleList = Arrays.asList(rol);
+
+        User user = new User();
+        user.setId(1L);
+        user.setEmail("danieloliva@gmail.com");
+        user.setPassword("12345678");
+        user.setFirstName("Daniel");
+        user.setLastName("Oliva");
+        user.setRoles(roleList);
+
+        User user2 = new User();
+        user2.setId(2L);
+        user2.setEmail("danieloliva@gmail.com");
+        user2.setPassword("12345678");
+        user2.setFirstName("Daniel");
+        user2.setLastName("Oliva");
+        user2.setRoles(roleList);
+
+        UserPrincipal userPrincipal = UserPrincipal.create(user);
+
+        when(userRepository.getUser(userPrincipal)).thenReturn(user);
+
+        Album album = new Album();
+        album.setId(1L);
+        album.setTitle("Viaje a Francia.");
+        album.setUser(user2);
+
+        AlbumRequest albumRequest = new AlbumRequest();
+        albumRequest.setId(album.getId());
+        albumRequest.setTitle("Viaje a París");
+        albumRequest.setUser(user2);
+
+        Album updated = new Album();
+        updated.setId(album.getId());
+        updated.setTitle(albumRequest.getTitle());
+        updated.setUser(albumRequest.getUser());
+
+        AlbumResponse albumResponse = new AlbumResponse();
+        albumResponse.setId(updated.getId());
+        albumResponse.setTitle(updated.getTitle());
+        albumResponse.setUser(updated.getUser());
+
+        when(albumRepository.findById(1L)).thenReturn(Optional.of(album));
+        when(userRepository.getUser(userPrincipal)).thenReturn(user);
+        when(albumRepository.save(any(Album.class))).thenReturn(updated);
+
+        assertNotEquals(album.getUser().getId(), userPrincipal.getId() );
+        assertThrows(BlogapiException.class, () -> albumService.updateAlbum(album.getId(),albumRequest, userPrincipal).getBody());
+
+    }
+
+    @Test
+    void deleteAlbum_success() {
 
         Role admin = new Role();
         admin.setId(1L);
@@ -173,7 +277,7 @@ class AlbumServiceImplTest {
     }
 
     @Test
-    void deleteAlbum_ResourceNotFoundException_access() {
+    void deleteAlbum_ResourceNotFoundException_success() {
 
         Role admin = new Role();
         admin.setId(1L);

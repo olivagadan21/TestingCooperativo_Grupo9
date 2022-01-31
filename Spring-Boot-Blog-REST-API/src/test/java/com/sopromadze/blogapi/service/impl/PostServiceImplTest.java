@@ -42,7 +42,7 @@ public class PostServiceImplTest {
     PostServiceImpl postService;
 
     @Test
-    void getPostsByCreatedBy_access() {
+    void getPostsByCreatedBy_success() {
 
         //SIN TERMINAR
 
@@ -70,7 +70,6 @@ public class PostServiceImplTest {
         Page<Post> postsPage = new PageImpl<>(Arrays.asList(post));
 
         Page<Post> posts = postRepository.findAll(any(Pageable.class));
-
 
         PagedResponse<Post> postPagedResponse = new PagedResponse<>();
         postPagedResponse.setContent(postsPage.getContent());

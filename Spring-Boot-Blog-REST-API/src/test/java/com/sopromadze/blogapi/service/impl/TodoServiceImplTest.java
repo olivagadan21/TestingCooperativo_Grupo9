@@ -44,7 +44,7 @@ class TodoServiceImplTest {
     TodoServiceImpl todoService;
 
     @Test
-    void getAllTodos_access() {
+    void getAllTodos_success() {
 
         //SIN TERMINAR
 
@@ -87,7 +87,7 @@ class TodoServiceImplTest {
     }
 
     @Test
-    void getTodo_access() {
+    void getTodo_success() {
 
         Role rol = new Role();
         rol.setName(RoleName.ROLE_ADMIN);
@@ -120,7 +120,7 @@ class TodoServiceImplTest {
     }
 
     @Test
-    void getTodo_ResourceNotFoundException_access() {
+    void getTodo_ResourceNotFoundException_success() {
 
         Role rol = new Role();
         rol.setName(RoleName.ROLE_ADMIN);

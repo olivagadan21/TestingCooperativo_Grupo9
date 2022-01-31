@@ -84,7 +84,7 @@ public class CommentServiceImplTest {
     }
 
     @Test
-    void addComment_ResourceNotFoundException_access() {
+    void addComment_ResourceNotFoundException_success() {
 
         Role rol = new Role();
         rol.setName(RoleName.ROLE_ADMIN);
@@ -121,7 +121,7 @@ public class CommentServiceImplTest {
     }
 
     @Test
-    void updateComment_access() {
+    void updateComment_success() {
 
         Role rol = new Role();
         rol.setId(1L);
@@ -171,7 +171,7 @@ public class CommentServiceImplTest {
     }
 
     @Test
-    void updateComment_ResourceNotFoundException_Post_access() {
+    void updateComment_ResourceNotFoundException_Post_success() {
 
         Role rol = new Role();
         rol.setId(1L);
@@ -217,7 +217,7 @@ public class CommentServiceImplTest {
     }
 
     @Test
-    void updateComment_ResourceNotFoundException_Comment_access() {
+    void updateComment_ResourceNotFoundException_Comment_success() {
 
         Role rol = new Role();
         rol.setId(1L);

@@ -39,7 +39,7 @@ class TagServiceImplTest {
     TagServiceImpl tagService;
 
     @Test
-    void getAllTags_access() {
+    void getAllTags_success() {
 
         Tag tag = new Tag();
         tag.setId(1L);
@@ -62,7 +62,7 @@ class TagServiceImplTest {
     }
 
     @Test
-    void updateTag_access() {
+    void updateTag_success() {
 
         Role rol = new Role();
         rol.setName(RoleName.ROLE_ADMIN);
@@ -101,7 +101,7 @@ class TagServiceImplTest {
     }
 
     @Test
-    void updateTag_ResourceNotFoundException_access() {
+    void updateTag_ResourceNotFoundException_success() {
 
         Role rol = new Role();
         rol.setName(RoleName.ROLE_ADMIN);
