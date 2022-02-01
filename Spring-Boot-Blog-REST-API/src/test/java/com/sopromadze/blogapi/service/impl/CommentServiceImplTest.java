@@ -8,6 +8,7 @@ import com.sopromadze.blogapi.model.role.Role;
 import com.sopromadze.blogapi.model.role.RoleName;
 import com.sopromadze.blogapi.model.user.User;
 import com.sopromadze.blogapi.payload.ApiResponse;
+import com.sopromadze.blogapi.payload.PagedResponse;
 import com.sopromadze.blogapi.repository.CommentRepository;
 import com.sopromadze.blogapi.repository.PostRepository;
 import com.sopromadze.blogapi.security.UserPrincipal;
@@ -18,13 +19,19 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -303,6 +310,34 @@ class CommentServiceImplTest {
         when(postRepository.findById(1L)).thenReturn(Optional.empty());
 
         assertThrows(ResourceNotFoundException.class, () -> commentService.deleteComment(1L, 1L,userPrincipal));
+    }
+    @Test
+    void getAllComments_success(){
+
+        Post post = new Post();
+        post.setTitle("Post buenardo");
+        post.setId(1L);
+
+        Comment comment = new Comment();
+        comment.setName("Pepe");
+        comment.setPost(post);
+
+        Page<Comment> resultado = new PageImpl<>(Arrays.asList(comment));
+
+        PagedResponse<Comment> pagedResponse = new PagedResponse<>();
+        pagedResponse.setContent(resultado.getContent());
+        pagedResponse.setTotalPages(1);
+        pagedResponse.setTotalElements(1);
+        pagedResponse.setLast(true);
+        pagedResponse.setSize(1);
+
+        Pageable pageable = PageRequest.of(1, 10);
+
+        when(commentRepository.findByPostId(any(Long.class), any(Pageable.class))).thenReturn(resultado);
+
+        assertEquals(pagedResponse, commentService.getAllComments(1L, 1, 10));
+
+
     }
 
 
