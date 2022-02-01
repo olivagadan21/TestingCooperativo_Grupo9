@@ -7,6 +7,7 @@ import com.sopromadze.blogapi.model.role.Role;
 import com.sopromadze.blogapi.model.role.RoleName;
 import com.sopromadze.blogapi.model.user.User;
 import com.sopromadze.blogapi.payload.AlbumResponse;
+import com.sopromadze.blogapi.payload.ApiResponse;
 import com.sopromadze.blogapi.payload.request.AlbumRequest;
 import com.sopromadze.blogapi.security.UserPrincipal;
 import com.sopromadze.blogapi.service.impl.AlbumServiceImpl;
@@ -20,17 +21,20 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.security.test.context.support.WithUserDetails;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.time.Instant;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @ExtendWith(SpringExtension.class)
@@ -92,6 +96,8 @@ class AlbumControllerTest {
     }
 
     @Test
+    @WithMockUser(authorities = {"ROLE_USER", "ROLE_ADMIN"})
+    @DisplayName("Update album return 200")
     void updateAlbum_success() throws Exception {
 
         Role rol = new Role();
@@ -138,6 +144,45 @@ class AlbumControllerTest {
                         .content(objectMapper.writeValueAsString(albumRequest))
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk());
+
+    }
+
+    @Test
+    @WithMockUser(authorities = {"ROLE_USER", "ROLE_ADMIN"})
+    @DisplayName("delete album return 200")
+    void deleteAlbum_success() throws Exception {
+
+        Role admin = new Role();
+        admin.setId(1L);
+        admin.setName(RoleName.ROLE_ADMIN);
+        List<Role> listRole = new ArrayList<>();
+        listRole.add(admin);
+
+        User user = new User();
+        user.setId(1L);
+        user.setEmail("danieloliva@gmail.com");
+        user.setPassword("12345678");
+        user.setFirstName("Daniel");
+        user.setLastName("Oliva");
+        user.setRoles(listRole);
+
+        UserPrincipal userPrincipal = UserPrincipal.create(user);
+
+        Album album = new Album();
+        album.setId(1L);
+        album.setTitle("Viaje de fin de curso");
+        album.setCreatedAt(Instant.now());
+        album.setUpdatedAt(Instant.now());
+        album.setUser(user);
+
+        ApiResponse apiResponse = new ApiResponse(Boolean.TRUE, "You successfully deleted album");
+        ResponseEntity<ApiResponse> responseResponseEntity = new ResponseEntity<ApiResponse>(apiResponse, HttpStatus.OK);
+
+        when(albumService.deleteAlbum(album.getId(), userPrincipal)).thenReturn(responseResponseEntity);
+
+        mockMvc.perform(delete("/api/albums/1", album.getId())
+                        .contentType("application/json"))
+                .andExpect(status().isOk()).andDo(print());
 
     }
 }

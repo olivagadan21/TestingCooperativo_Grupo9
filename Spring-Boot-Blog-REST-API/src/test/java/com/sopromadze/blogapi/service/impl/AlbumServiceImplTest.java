@@ -264,7 +264,6 @@ class AlbumServiceImplTest {
         album.setCreatedAt(Instant.now());
         album.setUpdatedAt(Instant.now());
         album.setUser(user);
-        albumRepository.save(album);
 
         when(albumRepository.findById(album.getId())).thenReturn(Optional.of(album));
         when(userRepository.getUser(userPrincipal)).thenReturn(user);
