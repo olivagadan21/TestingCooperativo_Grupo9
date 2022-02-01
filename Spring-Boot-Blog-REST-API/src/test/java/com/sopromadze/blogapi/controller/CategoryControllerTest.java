@@ -12,6 +12,7 @@ import com.sopromadze.blogapi.security.UserPrincipal;
 import com.sopromadze.blogapi.service.impl.CategoryServiceImpl;
 import lombok.extern.java.Log;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -33,14 +34,14 @@ import java.util.stream.Collectors;
 
 import static org.hamcrest.Matchers.hasSize;
 import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @AutoConfigureMockMvc
 @Log
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT, classes = {SpringSecurityTestWebConfig.class, TestDisableSecurityConfig.class}, properties = {"spring.main.allow-bean-definition-overriding=true"})
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT, classes = {SpringSecurityTestWebConfig.class}, properties = {"spring.main.allow-bean-definition-overriding=true"})
 public class CategoryControllerTest {
 
     @Autowired
@@ -132,17 +133,39 @@ public class CategoryControllerTest {
 
     }
 
+
     @Test
-    void whenUpdateCategory_returns403() throws Exception{
-        ResponseEntity<Category> responseEntity = new ResponseEntity<>(newCategory, HttpStatus.OK);
+    @WithUserDetails("USER")
+    @DisplayName("Add caregory return 200")
+    void addCategory_success() throws Exception {
+        Category category = new Category();
 
-        when(categoryService.updateCategory(category.getId(), newCategory, userPrincipal)).thenReturn(responseEntity);
-
-        mockMvc.perform(put("/api/categories/{id}", 1L)
-                        .content(objectMapper.writeValueAsString(newCategory))
+        mockMvc.perform(post("/api/categories")
+                        .content(objectMapper.writeValueAsString(category))
                         .contentType("application/json"))
-                .andExpect(status().isForbidden()).andDo(print());
+                .andExpect(status().isOk())
+                .andReturn();
 
     }
+
+    @Test
+    @WithUserDetails("USER")
+    @DisplayName("Add caregory return 400")
+    void addCategory_badRequest () throws Exception {
+        mockMvc.perform(post("/api/categories")
+                        .contentType("application/json"))
+                .andExpect(status().isBadRequest())
+                .andReturn();
+    }
+
+    @Test
+    @DisplayName("Add caregory unauthorized, return 401")
+    void addCategory_unauthorized () throws Exception {
+        mockMvc.perform(post("/api/categories")
+                        .contentType("application/json"))
+                .andExpect(status().isUnauthorized())
+                .andReturn();
+    }
+
 
 }

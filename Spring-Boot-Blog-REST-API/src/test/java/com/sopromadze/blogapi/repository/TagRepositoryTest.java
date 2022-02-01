@@ -24,7 +24,7 @@ class TagRepositoryTest {
     private TestEntityManager testEntityManager;
 
     @Test
-    void testRepoNotNull() {
+    void repoNotNull() {
         assertNotNull(tagRepository);
     }
 

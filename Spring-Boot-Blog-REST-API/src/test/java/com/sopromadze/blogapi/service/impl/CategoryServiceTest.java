@@ -7,8 +7,10 @@ import com.sopromadze.blogapi.model.role.RoleName;
 import com.sopromadze.blogapi.model.user.User;
 import com.sopromadze.blogapi.payload.PagedResponse;
 import com.sopromadze.blogapi.repository.CategoryRepository;
+import com.sopromadze.blogapi.repository.UserRepository;
 import com.sopromadze.blogapi.security.UserPrincipal;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -21,10 +23,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
+import java.time.Instant;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -34,6 +34,9 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
 public class CategoryServiceTest {
+
+    @Mock
+    UserRepository userRepository;
 
     @Mock
     private CategoryRepository categoryRepository;
@@ -125,6 +128,42 @@ public class CategoryServiceTest {
         when(categoryRepository.findById(5L)).thenReturn(Optional.empty());
 
         assertThrows(ResourceNotFoundException.class, ()->categoryService.updateCategory(5L, newCategory, userPrincipal));
+    }
+
+    /*
+     * Test: Se comprueba que el método devuelve ResponseEntity<Category>
+     * Entrada: categoryService.addCategory(category, userPrincipal)
+     * Salida esperada: Test se realiza con éxito y devuelve ResponseEntity<Category>
+     */
+    @Test
+    @DisplayName("Add category")
+    void addCategory_success() {
+        Role role = new Role();
+        role.setId(1L);
+        role.setName(RoleName.ROLE_ADMIN);
+        List<Role> listRole = new ArrayList<>();
+        listRole.add(role);
+
+        User user = new User();
+        user.setId(1L);
+        user.setUpdatedAt(Instant.now());
+        user.setEmail("jesus@gmail.com");
+        user.setPassword("12345678");
+        user.setFirstName("Jesús");
+        user.setCreatedAt(Instant.now());
+        user.setRoles(listRole);
+
+        UserPrincipal userPrincipal = UserPrincipal.create(user);
+
+        Category category = new Category();
+        category.setId(1L);
+        category.setName("Fotos de verano");
+
+        when(userRepository.getUserByName(userPrincipal.getUsername())).thenReturn(user);
+        when(categoryRepository.save(category)).thenReturn(category);
+
+        ResponseEntity responseEntity = new ResponseEntity(category, HttpStatus.CREATED);
+        assertEquals(responseEntity,categoryService.addCategory(category, userPrincipal));
     }
 
 }
