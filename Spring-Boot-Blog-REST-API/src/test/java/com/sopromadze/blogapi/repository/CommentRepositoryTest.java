@@ -34,11 +34,10 @@ class CommentRepositoryTest {
     private TestEntityManager testEntityManager;
 
     @Test
-    void testRepoNotNull() {
+    void repoNotNull() {
         assertNotNull(commentRepository);
         assertNotNull(postRepository);
     }
-
 
     @Test
     public void findByPostIdInComment_success() {

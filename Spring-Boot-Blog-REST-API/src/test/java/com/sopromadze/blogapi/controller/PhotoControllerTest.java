@@ -13,13 +13,16 @@ import com.sopromadze.blogapi.security.UserPrincipal;
 import com.sopromadze.blogapi.service.impl.PhotoServiceImpl;
 import lombok.extern.java.Log;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.MediaType;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.security.test.context.support.WithUserDetails;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.time.Instant;
@@ -28,8 +31,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -134,6 +137,52 @@ public class PhotoControllerTest {
 
     }
 
+    @Test
+    @DisplayName("Add photo return 201")
+    @WithUserDetails("USER")
+    void addPhoto_success() throws Exception {
+        PhotoRequest photoRequest = new PhotoRequest();
+        photoRequest.setTitle("Nueva foto");
+        photoRequest.setUrl("https://photorequest.es");
+        photoRequest.setThumbnailUrl("https://photoRequest.es");
+        photoRequest.setAlbumId(1L);
+
+        mockMvc.perform(post("/api/photos")
+                        .content(objectMapper.writeValueAsString(photoRequest))
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    @DisplayName("Add photo unauthorized return 401")
+    void addPhoto_Unauthorized() throws Exception {
+        PhotoRequest photoRequest = new PhotoRequest();
+        photoRequest.setTitle("Solicitud de fotos");
+        photoRequest.setUrl("https://photorequest.es");
+        photoRequest.setThumbnailUrl("https://photoRequest.es");
+        photoRequest.setAlbumId(1L);
+
+        mockMvc.perform(post("/api/photos")
+                        .content(objectMapper.writeValueAsString(photoRequest))
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    @DisplayName("Add photo return 400")
+    @WithUserDetails("USER")
+    void addPhoto_badRequest() throws Exception {
+        PhotoRequest photoRequest = new PhotoRequest();
+        photoRequest.setTitle("Solicitud de fotos");
+        photoRequest.setUrl("https://photorequest.es");
+        photoRequest.setThumbnailUrl("https://photoRequest.es");
+        photoRequest.setAlbumId(1L);
+        User user = new User();
+        mockMvc.perform(post("/api/photos")
+                        .content(objectMapper.writeValueAsString(user))
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest());
+    }
 
 
 
