@@ -101,7 +101,6 @@ class TodoServiceImplTest {
         user.setFirstName("Daniel");
         user.setLastName("Oliva");
         user.setRoles(roleList);
-        userRepository.save(user);
 
         UserPrincipal userPrincipal = UserPrincipal.create(user);
 

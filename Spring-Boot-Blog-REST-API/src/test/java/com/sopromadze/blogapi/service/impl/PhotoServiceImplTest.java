@@ -125,7 +125,6 @@ public class PhotoServiceImplTest {
         album.setCreatedAt(Instant.now());
         album.setUpdatedAt(Instant.now());
         album.setUser(user);
-        albumRepository.save(album);
 
         Photo photo = new Photo();
         photo.setId(1L);
@@ -133,7 +132,6 @@ public class PhotoServiceImplTest {
         photo.setUrl("https://media.tacdn.com/media/attractions-splice-spp-674x446/06/74/ab/3e.jpg");
         photo.setThumbnailUrl("https://www.toureiffel.paris/sites/default/files/styles/1200x675/public/actualite/image_principale/IMG_20200526_123909.jpg?itok=DeDSW4xL");
         photo.setAlbum(album);
-        photoRepository.save(photo);
 
         when(photoRepository.findById(1L)).thenReturn(Optional.of(photo));
 

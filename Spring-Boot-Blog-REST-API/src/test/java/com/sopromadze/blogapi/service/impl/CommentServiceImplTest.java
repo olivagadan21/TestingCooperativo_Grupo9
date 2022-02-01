@@ -160,7 +160,6 @@ public class CommentServiceImplTest {
         updated.setName(comment.getName());
         updated.setPost(comment.getPost());
 
-
         when(postRepository.findById(post.getId())).thenReturn(Optional.of(post));
         when(commentRepository.findById(comment.getId())).thenReturn(Optional.of(comment));
         when(commentRepository.save(any(Comment.class))).thenReturn(updated);
