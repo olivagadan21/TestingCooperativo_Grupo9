@@ -27,6 +27,11 @@ class TagServiceImplTest {
     @InjectMocks
     TagServiceImpl tagService;
 
+    /*
+     * Test: Se comprueba que el método devuelve un Tag
+     * Entrada: tagService.getTag(1L)
+     * Salida esperada: Test se realiza con éxito
+     */
     @Test
     @DisplayName("Get tag")
     void getTag_success() {
@@ -35,9 +40,13 @@ class TagServiceImplTest {
         tag.setName("#Salesianos");
 
         when(tagRepository.findById(1L)).thenReturn(Optional.of(tag));
-        assertEquals(tagService.getTag(1L),tag);
+        assertEquals(tag, tagService.getTag(1L));
     }
-
+    /*
+     * Test: Se comprueba que el método lanza la excepción ResourceNotFoundException
+     * Entrada: tagService.getTag(1L)
+     * Salida esperada: Test se realiza con éxito y lanza la excepción ResourceNotFoundException
+     */
     @Test
     @DisplayName("Get tag, content empty")
     void getTag_contentEmpty() {

@@ -51,6 +51,11 @@ class PhotoServiceImplTest {
     @InjectMocks
     PhotoServiceImpl photoService;
 
+    /*
+     * Test: Se comprueba que el método devuelve PhotoResponse
+     * Entrada: photoService.addPhoto(photoRequest, userPrincipal)
+     * Salida esperada: Test se realiza con éxito y se añade nueva foto
+     */
     @Test
     @DisplayName("Add photo")
     void addPhoto_success() {
@@ -94,7 +99,11 @@ class PhotoServiceImplTest {
         assertEquals(photoResponse, photoService.addPhoto(photoRequest, userPrincipal));
 
     }
-
+    /*
+     * Test: Se comprueba que el método lanza la excepción UnauthorizedException
+     * Entrada: photoService.addPhoto(photoRequest, userPrincipal)
+     * Salida esperada: Test se realiza con éxito y se lanza la excepción UnauthorizedException
+     */
     @Test
     @DisplayName("Add photo unauthorizedException ")
     void addPhoto_UnauthorizedException() {
@@ -137,11 +146,14 @@ class PhotoServiceImplTest {
         UserPrincipal userPrincipal = UserPrincipal.create(primerUsuario);
 
         when(albumRepository.findById(photoRequest.getAlbumId())).thenReturn(Optional.of(album));
-
         assertThrows(UnauthorizedException.class, () -> photoService.addPhoto(photoRequest, userPrincipal));
 
     }
-
+    /*
+     * Test: Se comprueba que el método lanza la excepción ResourceNotFoundException
+     * Entrada: photoService.addPhoto(photoRequest, userPrincipal)
+     * Salida esperada: Test se realiza con éxito y se lanza la excepción ResourceNotFoundException
+     */
     @Test
     @DisplayName("Add photo, album is empty")
     void addPhoto_when_albumIsEmpty () {
@@ -169,7 +181,11 @@ class PhotoServiceImplTest {
         assertThrows(ResourceNotFoundException.class, () -> photoService.addPhoto(photoRequest, userPrincipal));
     }
 
-
+    /*
+     * Test: Se comprueba que el método devuelve todas las fotos de un albúm
+     * Entrada: photoService.getAllPhotosByAlbum(1L,1,1)
+     * Salida esperada: Test se realiza con éxito devuelve PagedResponse de fotos
+     */
     @Test
     @DisplayName("Get all photos by album")
     void getAllPhotosByAlbum_success() {
@@ -190,15 +206,19 @@ class PhotoServiceImplTest {
         List<PhotoResponse> photoResponses = new ArrayList<>();
         photoResponses.add(photoResponse);
 
-        PagedResponse postPagedResponse =new PagedResponse<>(photoResponses, photoPage.getNumber(), photoPage.getSize(), photoPage.getTotalElements(),
+        PagedResponse photoPagedResponse =new PagedResponse<>(photoResponses, photoPage.getNumber(), photoPage.getSize(), photoPage.getTotalElements(),
                 photoPage.getTotalPages(), photoPage.isLast());
 
         Pageable pageable = PageRequest.of(1, 1, Sort.Direction.DESC, AppConstants.CREATED_AT);
 
         when(photoRepository.findByAlbumId(1L, pageable)).thenReturn(photoPage);
-        assertEquals(postPagedResponse,photoService.getAllPhotosByAlbum(1L,1,1));
+        assertEquals(photoPagedResponse,photoService.getAllPhotosByAlbum(1L,1,1));
     }
-
+    /*
+     * Test: Se comprueba que el método devuelve que los elementos son igual a 0
+     * Entrada: photoService.getAllPhotosByAlbum(1L,1,1)
+     * Salida esperada: Test se realiza con éxito devuelve 0 elementos
+     */
     @Test
     @DisplayName("Get all photos by album, album is empty")
     void getAllPhotosByAlbum_whenAlbumIsEmpty() {
@@ -218,9 +238,6 @@ class PhotoServiceImplTest {
 
         List<PhotoResponse> photoResponses = new ArrayList<>();
         photoResponses.add(photoResponse);
-
-        PagedResponse postPagedResponse =new PagedResponse<>(photoResponses, photoPage.getNumber(), photoPage.getSize(), photoPage.getTotalElements(),
-                photoPage.getTotalPages(), photoPage.isLast());
 
         Pageable pageable = PageRequest.of(1, 1, Sort.Direction.DESC, AppConstants.CREATED_AT);
 

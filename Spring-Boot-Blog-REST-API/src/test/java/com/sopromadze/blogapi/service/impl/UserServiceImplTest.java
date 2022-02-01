@@ -45,7 +45,11 @@ class UserServiceImplTest {
 
     @InjectMocks
     UserServiceImpl userService;
-
+    /*
+     * Test: Se comprueba que el método devuelve UserProfile
+     * Entrada: userService.getUserProfile("Jesús")
+     * Salida esperada: Test se realiza con éxito
+     */
     @Test
     @DisplayName("Get user profile")
     void getUserProfile_success() {
@@ -80,7 +84,11 @@ class UserServiceImplTest {
         when(postRepository.countByCreatedBy(user.getId())).thenReturn(user.getId());
         assertEquals(userProfile, userService.getUserProfile("Jesús"));
     }
-
+    /*
+     * Test: Se comprueba que el método devuelve ApiResponse
+     * Entrada: userService.deleteUser("Jesús",userPrincipal)
+     * Salida esperada: Test se realiza con éxito
+     */
     @Test
     @DisplayName("Delete user")
     void deleteUser_success() {
@@ -106,6 +114,11 @@ class UserServiceImplTest {
         assertEquals(apiResponse, userService.deleteUser("Jesús",userPrincipal));
     }
 
+    /*
+     * Test: Se comprueba que el método lanza la excepción ResourceNotFoundException
+     * Entrada: userService.deleteUser("Jesús",userPrincipal)
+     * Salida esperada: Test se realiza con éxito y lanza la excepción ResourceNotFoundException
+     */
     @Test
     @DisplayName("Delete user resource not found exception")
     void deleteUser_ResourceNotFoundException() {
@@ -129,7 +142,11 @@ class UserServiceImplTest {
         when(userRepository.findByUsername("Paco")).thenReturn(Optional.empty());
         assertThrows(ResourceNotFoundException.class, ()-> userService.deleteUser("Jesús",userPrincipal));
     }
-
+    /*
+     * Test: Se comprueba que el método lanza la excepción AccessDeniedException
+     * Entrada: userService.deleteUser("Jesús",userPrincipal)
+     * Salida esperada: Test se realiza con éxito y lanza la excepción AccessDeniedException
+     */
     @Test
     @DisplayName("Delete user access denied exception")
     void deleteUser_AccessDeniedException() {
@@ -154,7 +171,11 @@ class UserServiceImplTest {
         assertThrows(AccessDeniedException.class, ()-> userService.deleteUser("Jesús",userPrincipal));
     }
 
-
+    /*
+     * Test: Se comprueba que el método devuelve UserProfile
+     * Entrada: userService.setOrUpdateInfo(userPrincipal, infoRequest)
+     * Salida esperada: Test se realiza con éxito
+     */
     @Test
     @DisplayName("Set or update info")
     void setOrUpdateInfo_success() {
@@ -210,7 +231,11 @@ class UserServiceImplTest {
         assertEquals(userProfile, userService.setOrUpdateInfo(userPrincipal, infoRequest));
 
     }
-
+    /*
+     * Test: Se comprueba que el método lanza la excepción ResourceNotFoundException
+     * Entrada: userService.setOrUpdateInfo(userPrincipal, infoRequest)
+     * Salida esperada: Test se realiza con éxito y lanza la excepción ResourceNotFoundException
+     */
     @Test
     @DisplayName("Set or update info, resource not found")
     void setOrUpdateInfo_resourceNotFoundException() {
@@ -237,7 +262,11 @@ class UserServiceImplTest {
         when(userRepository.findByUsername("Paco")).thenReturn(Optional.empty());
         assertThrows(ResourceNotFoundException.class, ()->userService.setOrUpdateInfo(userPrincipal,infoRequest));
     }
-
+    /*
+     * Test: Se comprueba que el método lanza la excepción AccessDeniedException
+     * Entrada: userService.setOrUpdateInfo(userPrincipal, infoRequest)
+     * Salida esperada: Test se realiza con éxito y lanza la excepción AccessDeniedException
+     */
     @Test
     @DisplayName("Set or update info acccess denied")
     void setOrUpdateInfo_AccessDeniedException() {

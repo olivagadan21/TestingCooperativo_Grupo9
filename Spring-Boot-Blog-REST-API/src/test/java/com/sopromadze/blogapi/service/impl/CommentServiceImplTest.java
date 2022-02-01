@@ -41,6 +41,11 @@ class CommentServiceImplTest {
     @InjectMocks
     CommentServiceImpl commentService;
 
+    /*
+     * Test: Se comprueba que el método devuelve Comment
+     * Entrada: commentService.getComment(1L, 1L)
+     * Salida esperada: Test se realiza con éxito y devuelve el Comment indicado por ID
+     */
     @Test
     @DisplayName("Get comment id")
     void getCommentId_success() {
@@ -64,6 +69,11 @@ class CommentServiceImplTest {
         assertEquals(comment, commentService.getComment(1L, 1L));
     }
 
+    /*
+     * Test: Se comprueba que el método devuelve la excepción indicada BlogapiException
+     * Entrada: commentService.getComment(1L, 1L)
+     * Salida esperada: Test se realiza con éxito y lanza la excepción BlogapiException
+     */
     @Test
     @DisplayName("Get comment id, exception")
     void getCommentId_exception (){
@@ -73,11 +83,11 @@ class CommentServiceImplTest {
         post.setCreatedAt(Instant.now());
         post.setUpdatedAt(Instant.now());
 
-        Post post1 = new Post();
-        post1.setId(2L);
-        post1.setBody("Esta post tiene un gran significado para mí");
-        post1.setCreatedAt(Instant.now());
-        post1.setUpdatedAt(Instant.now());
+        Post secondPost = new Post();
+        secondPost.setId(2L);
+        secondPost.setBody("Es bastante chula");
+        secondPost.setCreatedAt(Instant.now());
+        secondPost.setUpdatedAt(Instant.now());
 
         Comment comment = new Comment();
         comment.setId(1L);
@@ -86,14 +96,18 @@ class CommentServiceImplTest {
         comment.setEmail("barco@gmail.com");
         comment.setCreatedAt(Instant.now());
         comment.setUpdatedAt(Instant.now());
-        comment.setPost(post1);
+        comment.setPost(secondPost);
 
         when(postRepository.findById(1L)).thenReturn(Optional.of(post));
         when(commentRepository.findById(1L)).thenReturn(Optional.of(comment));
         assertThrows(BlogapiException.class, () -> commentService.getComment(1L, 1L));
 
     }
-
+    /*
+     * Test: Se comprueba que el método devuelve la excepción indicada ResourceNotFoundException
+     * Entrada: commentService.getComment(1L, 1L)
+     * Salida esperada: Test se realiza con éxito y lanza la excepción ResourceNotFoundException
+     */
     @Test
     @DisplayName("Get comment id, post id not found")
     void getCommentId_postIdNotFound_ResourceNotFoundException() {
@@ -102,20 +116,29 @@ class CommentServiceImplTest {
         assertThrows(ResourceNotFoundException.class, () -> commentService.getComment(1L, 1L));
     }
 
+    /*
+     * Test: Se comprueba que el método devuelve la excepción indicada ResourceNotFoundException
+     * Entrada: commentService.getComment(1L, 1L)
+     * Salida esperada: Test se realiza con éxito y lanza la excepción ResourceNotFoundException
+     */
     @Test
     @DisplayName("Get comment id, comment id not found")
     void getCommentId_commentIdNotFound_ResourceNotFoundException() {
 
-        Post post1 = new Post();
-        post1.setId(2L);
-        post1.setBody("Esta post tiene un gran significado para mí");
-        post1.setCreatedAt(Instant.now());
-        post1.setUpdatedAt(Instant.now());
+        Post post = new Post();
+        post.setId(2L);
+        post.setBody("Esta post tiene un gran significado para mí");
+        post.setCreatedAt(Instant.now());
+        post.setUpdatedAt(Instant.now());
 
         when(commentRepository.findById(1L)).thenReturn(Optional.empty());
         assertThrows(ResourceNotFoundException.class, () -> commentService.getComment(1L, 1L));
     }
-
+    /*
+     * Test: Se comprueba que el método devuelve elimina Comment indicado por ID
+     * Entrada: commentService.getComment(1L, 1L)
+     * Salida esperada: Test se realiza con éxito y elimina el comentario
+     */
     @Test
     @DisplayName("Delete comment")
     void deleteComment_success() {
@@ -159,6 +182,11 @@ class CommentServiceImplTest {
 
     }
 
+    /*
+     * Test: Se comprueba que el método devuelve ApiResponse
+     * Entrada: commentService.getComment(1L, 1L)
+     * Salida esperada: Test se realiza con éxito y devuelve ApiResponse
+     */
     @Test
     @DisplayName("Delete comment  when post id not equals post id")
     void deleteComment_when_postIdNotEqualsCommentPostId() {
@@ -211,6 +239,11 @@ class CommentServiceImplTest {
 
     }
 
+    /*
+     * Test: Se comprueba que el método devuelve la excepción indicada BlogapiException
+     * Entrada: commentService.getComment(1L, 1L)
+     * Salida esperada: Test se realiza con éxito y lanza la excepción BlogapiException
+     */
    @Test
    @DisplayName("Delete comment, exception")
     void deleteComment_BlogApiException() {
@@ -263,6 +296,11 @@ class CommentServiceImplTest {
         assertThrows(BlogapiException.class, () -> commentService.deleteComment(1L,1L,userPrincipal));
     }
 
+    /*
+     * Test: Se comprueba que el método devuelve la excepción indicada ResourceNotFoundException
+     * Entrada: commentService.getComment(1L, 1L)
+     * Salida esperada: Test se realiza con éxito y lanza la excepción ResourceNotFoundException
+     */
     @Test
     @DisplayName("Delete comment, post id not found")
     void deleteComment_postIdNonExists_ResourceNotFoundException(){
@@ -286,7 +324,41 @@ class CommentServiceImplTest {
         when(postRepository.findById(1L)).thenReturn(Optional.empty());
         assertThrows(ResourceNotFoundException.class, () -> commentService.deleteComment(1L, 1L,userPrincipal));
     }
+    /*
+     * Test: Se comprueba que el método devuelve la excepción indicada ResourceNotFoundException
+     * Entrada: commentService.getComment(1L, 1L)
+     * Salida esperada: Test se realiza con éxito y lanza la excepción ResourceNotFoundException
+     */
+    @Test
+    @DisplayName("Delete comment, comment id not found")
+    void deleteComment_commentIdNonExists_ResourceNotFoundException(){
 
+        Role role = new Role();
+        role.setId(1L);
+        role.setName(RoleName.ROLE_USER);
+        List<Role> listRole = new ArrayList<>();
+        listRole.add(role);
 
+        Post post = new Post();
+        post.setId(1L);
+        post.setBody("Esta post tiene un gran significado para mí");
+        post.setCreatedAt(Instant.now());
+        post.setUpdatedAt(Instant.now());
+
+        User user = new User();
+        user.setId(1L);
+        user.setUpdatedAt(Instant.now());
+        user.setEmail("jesus@gmail.com");
+        user.setPassword("12345678");
+        user.setFirstName("Jesús");
+        user.setCreatedAt(Instant.now());
+        user.setRoles(listRole);
+
+        UserPrincipal userPrincipal = UserPrincipal.create(user);
+        when(postRepository.findById(1L)).thenReturn(Optional.of(post));
+        when(commentRepository.findById(1L)).thenReturn(Optional.empty());
+
+        assertThrows(ResourceNotFoundException.class, () -> commentService.deleteComment(1L, 1L,userPrincipal));
+    }
 
 }

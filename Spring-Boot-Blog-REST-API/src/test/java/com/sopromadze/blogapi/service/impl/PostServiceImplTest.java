@@ -22,12 +22,10 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
-import org.springframework.boot.convert.DataSizeUnit;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 
-import javax.swing.text.html.Option;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -55,7 +53,11 @@ class PostServiceImplTest {
     @InjectMocks
     private PostServiceImpl postService;
 
-
+    /*
+     * Test: Se comprueba que el método devuelve PagedResponse de Post
+     * Entrada: postService.getAllPosts(0, 10)
+     * Salida esperada: Test se realiza con éxito
+    */
     @Test
     @DisplayName("Get all posts")
     void getAllPosts_success() {
@@ -80,7 +82,11 @@ class PostServiceImplTest {
         assertEquals(postPagedResponse, postService.getAllPosts(0, 10));
 
     }
-
+    /*
+     * Test: Se comprueba que el método devuelve PagedResponse de Post sin ningún contenido
+     * Entrada: postService.getAllPosts(0, 10)
+     * Salida esperada: Test se realiza con éxito, devuelve PagedResponse vacío
+     */
     @Test
     @DisplayName("Get all posts, content empty")
     void getAllPosts_contentIsEmpty() {
@@ -97,7 +103,11 @@ class PostServiceImplTest {
         assertEquals(postPagedResponse, postService.getAllPosts(0, 10));
 
     }
-
+    /*
+     * Test: Se comprueba que el método devuelve Post editada
+     * Entrada: postService.updatePost(1L, postRequest, userPrincipal)
+     * Salida esperada: Test se realiza con éxito
+    */
     @Test
     @DisplayName("Update post")
     void updatePost_success() {
@@ -144,7 +154,11 @@ class PostServiceImplTest {
         when(postRepository.save(post)).thenReturn(post);
         assertEquals(post, postService.updatePost(1L, postRequest, userPrincipal));
     }
-
+    /*
+     * Test: Se comprueba que el método lanza la excepción ResourceNotFoundException
+     * Entrada: postService.updatePost(1L, postRequest, userPrincipal)
+     * Salida esperada: Test se realiza con éxito, se lanza la excepción ResourceNotFoundException
+    */
     @Test
     @DisplayName("Update post, not found")
     void updatePost_ResourceNotFoundException() {
@@ -173,7 +187,11 @@ class PostServiceImplTest {
 
         assertThrows(ResourceNotFoundException.class, () -> postService.updatePost(1L, postRequest, userPrincipal));
     }
-
+    /*
+     * Test: Se comprueba que el método lanza la excepción UnauthorizedException
+     * Entrada: postService.updatePost(1L, postRequest, userPrincipal)
+     * Salida esperada: Test se realiza con éxito, se lanza la excepción UnauthorizedException
+    */
     @Test
     @DisplayName("Update post, unauthorized")
     void updatePost_UnauthorizedException() {
@@ -224,7 +242,11 @@ class PostServiceImplTest {
 
         assertThrows(UnauthorizedException.class, () -> postService.updatePost(1L, postRequest, userPrincipal));
     }
-
+    /*
+     * Test: Se comprueba que el método devuelve PagedResponse de Post
+     * Entrada: postService.getPostsByTag(1L,1,1)
+     * Salida esperada: Test se realiza con éxito
+    */
     @Test
     @DisplayName("Get posts by tag, content empty")
     void getPostsByTag_success () {
@@ -256,7 +278,47 @@ class PostServiceImplTest {
         when(postRepository.findByTagsIn(any(),any(Pageable.class))).thenReturn(postsPage);
         assertEquals(postPagedResponse, postService.getPostsByTag(1L,1,1));
     }
+    /*
+     * Test: Se comprueba que el método lanza la expeción ResourceNotFoundException
+     * Entrada: postService.getPostsByTag(1L,1,1)
+     * Salida esperada: Test se realiza con éxito y lanza la excepción ResourceNotFoundException
+    */
+    @Test
+    @DisplayName("Get posts by tag, not found")
+    void getPostsByTag_notFound () {
 
+        Tag tag = new Tag();
+        tag.setId(1L);
+        tag.setName("#Salesianos");
+
+        List<Tag> listTags = new ArrayList<>();
+        listTags.add(tag);
+
+        Post post = new Post();
+        post.setId(1L);
+        post.setBody("Esta post tiene un gran significado para mí");
+        post.setCreatedAt(Instant.now());
+        post.setUpdatedAt(Instant.now());
+        post.setTags(listTags);
+
+        Page<Post> postsPage = new PageImpl<>(Arrays.asList(post));
+
+        PagedResponse<Post> postPagedResponse = new PagedResponse<>();
+        postPagedResponse.setContent(postsPage.getContent());
+        postPagedResponse.setTotalElements(1);
+        postPagedResponse.setLast(true);
+        postPagedResponse.setSize(1);
+        postPagedResponse.setTotalPages(1);
+
+        when(tagRepository.findById(1L)).thenReturn(Optional.empty());
+        assertThrows(ResourceNotFoundException.class, ()-> postService.getPostsByTag(1L,1,1));
+    }
+
+    /*
+     * Test: Se comprueba que el método no contiene ningún elemento
+     * Entrada: postService.getPostsByTag(1L,1,1)
+     * Salida esperada: Test se realiza con éxito y contiene 0 elementos
+     */
     @Test
     @DisplayName("Get posts by tag")
     void getPostsByTag_contentIsEmpty () {
@@ -281,7 +343,7 @@ class PostServiceImplTest {
 
         when(tagRepository.findById(1L)).thenReturn(Optional.of(tag));
         when(postRepository.findByTagsIn(any(),any(Pageable.class))).thenReturn(postsPage);
-        assertEquals(postPagedResponse, postService.getPostsByTag(1L,1,1));
+        assertEquals(0, postService.getPostsByTag(1L,1,1).getTotalElements());
     }
 
 }

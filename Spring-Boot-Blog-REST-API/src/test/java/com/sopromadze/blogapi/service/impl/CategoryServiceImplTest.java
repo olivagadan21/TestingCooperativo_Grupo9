@@ -37,6 +37,11 @@ class CategoryServiceImplTest {
     @InjectMocks
     CategoryServiceImpl categoryService;
 
+    /*
+     * Test: Se comprueba que el método devuelve ResponseEntity<Category>
+     * Entrada: categoryService.addCategory(category, userPrincipal)
+     * Salida esperada: Test se realiza con éxito y devuelve ResponseEntity<Category>
+     */
     @Test
     @DisplayName("Add category")
     void addCategory_success() {

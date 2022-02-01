@@ -33,6 +33,11 @@ class CustomUserDetailsServiceImplTest {
     @InjectMocks
     CustomUserDetailsServiceImpl customUserDetailsService;
 
+    /*
+     * Test: Se comprueba que el método devuelve UserDetails
+     * Entrada: customUserDetailsService.loadUserByUsername("Jesusito")
+     * Salida esperada: Test se realiza con éxito y devuelve el UserDetails indicado por nombre
+     */
     @Test
     @DisplayName("Load by username")
     void loadUserByUsername_succes() {
@@ -56,6 +61,11 @@ class CustomUserDetailsServiceImplTest {
 
     }
 
+    /*
+     * Test: Se comprueba que el método lanza la expepción UsernameNotFoundException
+     * Entrada: customUserDetailsService.loadUserByUsername("barco#y")
+     * Salida esperada: Test se realiza con éxito y lanza la excepción UsernameNotFoundException
+     */
     @Test
     @DisplayName("Load by username usernameNotFoundException")
     void loadUserByUsername_UsernameNotFoundException() {

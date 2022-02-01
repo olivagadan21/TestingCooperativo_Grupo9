@@ -39,7 +39,6 @@ class CommentRepositoryTest {
         assertNotNull(postRepository);
     }
 
-
     @Test
     public void findByPostIdInComment_success() {
         Post post = new Post();

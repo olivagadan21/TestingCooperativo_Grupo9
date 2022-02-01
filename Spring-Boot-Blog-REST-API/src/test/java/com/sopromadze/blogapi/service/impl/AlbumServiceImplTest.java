@@ -38,6 +38,11 @@ class AlbumServiceImplTest {
     @InjectMocks
     AlbumServiceImpl albumService;
 
+    /*
+     * Test: Se comprueba que el método devuelve PagedResponse<AlbumResponse>
+     * Entrada: albumService.getAllAlbums(1,1)
+     * Salida esperada: Test se realiza con éxito
+    */
     @Test
     @DisplayName("Get all albums")
     void getAllAlbums_success() {
@@ -67,6 +72,11 @@ class AlbumServiceImplTest {
         when(modelMapper.map(any(), any())).thenReturn(albumList);
         assertEquals(result, albumService.getAllAlbums(1,1));
     }
+    /*
+     * Test: Se comprueba que el método devuelve cero elementos
+     * Entrada: albumService.getAllAlbums(1,1)
+     * Salida esperada: Test se realiza con éxito y no devuelve ningún elemento
+     */
     @Test
     @DisplayName("Get all album, when not exist elements")
     void getAllAlbums_whenElementsNotExist() {

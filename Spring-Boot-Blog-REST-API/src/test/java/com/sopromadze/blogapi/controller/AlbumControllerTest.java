@@ -52,6 +52,7 @@ class AlbumControllerTest {
     @MockBean
     AlbumServiceImpl albumService;
 
+
     @Test
     @DisplayName("Get all albums return 200")
     void getAllAlbums_success() throws Exception {

@@ -40,6 +40,11 @@ class TodoServiceImplTest {
     @InjectMocks
     TodoServiceImpl todoService;
 
+    /*
+     * Test: Se comprueba que el método devuelve 1TODO
+     * Entrada: todoService.completeTodo(1L, userPrincipal)
+     * Salida esperada: Test se realiza con éxito
+     */
     @Test
     @DisplayName("Complete todo")
     void completeTodo_success() {
@@ -73,7 +78,11 @@ class TodoServiceImplTest {
         assertEquals(todo, todoService.completeTodo(1L, userPrincipal));
 
     }
-
+    /*
+     * Test: Se comprueba que el método lanza la excepción ResourceNotFoundException
+     * Entrada: todoService.completeTodo(1L, userPrincipal)
+     * Salida esperada: Test se realiza con éxito y lanza la excepción ResourceNotFoundException
+     */
     @Test
     @DisplayName("Complete todo, todo not found")
     void completeTodo_todoNotFound() {
@@ -97,7 +106,11 @@ class TodoServiceImplTest {
         when(todoRepository.findById(1L)).thenReturn(Optional.empty());
         assertThrows(ResourceNotFoundException.class, () -> todoService.completeTodo(1L,userPrincipal));
     }
-
+    /*
+     * Test: Se comprueba que el método lanza la excepción UnauthorizedException
+     * Entrada: todoService.completeTodo(1L, userPrincipal)
+     * Salida esperada: Test se realiza con éxito y lanza la excepción UnauthorizedException
+     */
     @Test
     @DisplayName("Complete todo, unauthorized")
     void completeTodo_unauthorizedException() {
@@ -135,7 +148,11 @@ class TodoServiceImplTest {
         when(userRepository.getUser(userPrincipal)).thenReturn(user);
         assertThrows(UnauthorizedException.class, ()-> todoService.completeTodo(1L, userPrincipal));
     }
-
+    /*
+     * Test: Se comprueba que el método devuelve 1Todo
+     * Entrada: todoService.updateTodo(1L,newTodo, userPrincipal)
+     * Salida esperada: Test se realiza con éxito
+     */
     @Test
     @DisplayName("Update todo")
     void updateTodo_success() {
@@ -174,7 +191,11 @@ class TodoServiceImplTest {
         when(todoRepository.save(todo)).thenReturn(todo);
         assertEquals(todo,todoService.updateTodo(1L,newTodo, userPrincipal));
     }
-
+    /*
+     * Test: Se comprueba que el método lanza la excepción ResourceNotFoundException
+     * Entrada: todoService.updateTodo(1L,newTodo, userPrincipal)
+     * Salida esperada: Test se realiza con éxito y lanza la excepción ResourceNotFoundException
+     */
     @Test
     @DisplayName("Update, todo not found")
     void updateTodo_notFound () {
@@ -198,7 +219,11 @@ class TodoServiceImplTest {
         when(todoRepository.findById(1L)).thenReturn(Optional.empty());
         assertThrows(ResourceNotFoundException.class, () -> todoService.completeTodo(1L,userPrincipal));
     }
-
+    /*
+     * Test: Se comprueba que el método lanza la excepción UnauthorizedException
+     * Entrada: todoService.updateTodo(1L,newTodo, userPrincipal)
+     * Salida esperada: Test se realiza con éxito y lanza la excepción UnauthorizedException
+     */
     @Test
     @DisplayName("Update todo, unauthorized")
     void updateTodo_unauthorizedException() {
@@ -237,7 +262,11 @@ class TodoServiceImplTest {
         assertThrows(UnauthorizedException.class, ()-> todoService.completeTodo(1L, userPrincipal));
     }
 
-
+    /*
+     * Test: Se comprueba que el método elimina ApiResponse
+     * Entrada: todoService.deleteTodo(1L, userPrincipal)
+     * Salida esperada: Test se realiza con éxito
+     */
     @Test
     @DisplayName("Delete todo")
     void deleteTodo_success() {
@@ -271,7 +300,11 @@ class TodoServiceImplTest {
         assertEquals(apiResponse, todoService.deleteTodo(1L, userPrincipal));
 
     }
-
+    /*
+     * Test: Se comprueba que el método lanza la excepción UnauthorizedException
+     * Entrada: todoService.deleteTodo(1L, userPrincipal)
+     * Salida esperada: Test se realiza con éxito y lanza la excepción UnauthorizedException
+     */
     @Test
     @DisplayName("Delete todo, unauthorized")
     void delete_unauthorizedException() {
@@ -309,6 +342,12 @@ class TodoServiceImplTest {
         when(userRepository.getUser(userPrincipal)).thenReturn(user);
         assertThrows(UnauthorizedException.class, ()-> todoService.completeTodo(1L, userPrincipal));
     }
+
+    /*
+     * Test: Se comprueba que el método lanza la excepción ResourceNotFoundException
+     * Entrada: todoService.deleteTodo(1L, userPrincipal)
+     * Salida esperada: Test se realiza con éxito y lanza la excepción ResourceNotFoundException
+     */
     @Test
     @DisplayName("Delete, todo not found")
     void deleteTodo_notFound () {

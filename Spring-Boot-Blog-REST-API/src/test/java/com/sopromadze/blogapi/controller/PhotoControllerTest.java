@@ -2,11 +2,16 @@ package com.sopromadze.blogapi.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sopromadze.blogapi.SpringSecurityTestConfig;
+import com.sopromadze.blogapi.model.Album;
+import com.sopromadze.blogapi.model.Photo;
 import com.sopromadze.blogapi.model.role.Role;
 import com.sopromadze.blogapi.model.role.RoleName;
 import com.sopromadze.blogapi.model.user.User;
 import com.sopromadze.blogapi.payload.PhotoRequest;
+import com.sopromadze.blogapi.payload.PhotoResponse;
+import com.sopromadze.blogapi.security.UserPrincipal;
 import com.sopromadze.blogapi.service.PhotoService;
+import com.sopromadze.blogapi.service.impl.PhotoServiceImpl;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -43,14 +48,17 @@ class PhotoControllerTest {
     @Autowired
     private ObjectMapper objectMapper;
 
+    @MockBean
+    PhotoServiceImpl photoService;
+
     @Test
     @DisplayName("Add photo return 201")
     @WithUserDetails("USER")
     void addPhoto_success() throws Exception {
         PhotoRequest photoRequest = new PhotoRequest();
-        photoRequest.setTitle("Solicitud de fotos");
-        photoRequest.setUrl("https://photoreques");
-        photoRequest.setThumbnailUrl("https://photoRequest");
+        photoRequest.setTitle("Nueva foto");
+        photoRequest.setUrl("https://photorequest.es");
+        photoRequest.setThumbnailUrl("https://photoRequest.es");
         photoRequest.setAlbumId(1L);
 
         mockMvc.perform(post("/api/photos")
@@ -64,8 +72,8 @@ class PhotoControllerTest {
     void addPhoto_Unauthorized() throws Exception {
         PhotoRequest photoRequest = new PhotoRequest();
         photoRequest.setTitle("Solicitud de fotos");
-        photoRequest.setUrl("https://photoreques");
-        photoRequest.setThumbnailUrl("https://photoRequest");
+        photoRequest.setUrl("https://photorequest.es");
+        photoRequest.setThumbnailUrl("https://photoRequest.es");
         photoRequest.setAlbumId(1L);
 
         mockMvc.perform(post("/api/photos")
@@ -80,8 +88,8 @@ class PhotoControllerTest {
     void addPhoto_badRequest() throws Exception {
         PhotoRequest photoRequest = new PhotoRequest();
         photoRequest.setTitle("Solicitud de fotos");
-        photoRequest.setUrl("https://photoreques");
-        photoRequest.setThumbnailUrl("https://photoRequest");
+        photoRequest.setUrl("https://photorequest.es");
+        photoRequest.setThumbnailUrl("https://photoRequest.es");
         photoRequest.setAlbumId(1L);
         User user = new User();
         mockMvc.perform(post("/api/photos")
