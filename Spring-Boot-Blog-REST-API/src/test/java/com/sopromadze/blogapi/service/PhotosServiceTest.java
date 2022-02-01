@@ -92,7 +92,7 @@ public class PhotosServiceTest {
     void updatePhoto_success(){
 
         Role rol = new Role();
-        rol.setName(RoleName.ROLE_ADMIN);
+        rol.setName(RoleName.ROLE_USER);
 
         List<Role> roles = Arrays.asList(rol);
 

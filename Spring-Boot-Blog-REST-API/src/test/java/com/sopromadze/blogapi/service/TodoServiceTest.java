@@ -96,7 +96,7 @@ public class TodoServiceTest {
 
         todo = new Todo();
         todo.setId(1L);
-        todo.setUser(user);
+        todo.setUser(user2);
 
 
 
@@ -117,14 +117,14 @@ public class TodoServiceTest {
         assertThrows(ResourceNotFoundException.class, ()->todoService.unCompleteTodo(3L, userPrincipal));
     }
 
-    /*@Test
+    @Test
     void unCompleteTodo_throwsUnauthorizedException(){
         when(todoRepository.findById(todo.getId())).thenReturn(Optional.of(todo));
         when(userRepository.getUser(userPrincipal)).thenReturn(user);
-        System.out.println(user);
-        System.out.println(userPrincipal2.getId());
-        assertThrows(UnauthorizedException.class, ()->todoService.unCompleteTodo(todo.getId(), userPrincipal2));
-    }*/
+        System.out.println(todo.getUser().getId());
+        System.out.println(userPrincipal.getId());
+        assertThrows(UnauthorizedException.class, ()->todoService.unCompleteTodo(todo.getId(), userPrincipal));
+    }
 
     @Test
     void addTodo_success(){

@@ -55,9 +55,6 @@ public class UserControllerTest {
     @BeforeEach
     void initData(){
 
-
-
-
         user = new User();
         user.setId(3L);
         user.setUsername("DaTruth");
@@ -67,7 +64,6 @@ public class UserControllerTest {
         user.setEmail("pepe@gmail.com");
         user.setPhone("625971527");
         user.setWebsite("www.jrwtf.es");
-
         user.setCreatedAt(Instant.now());
 
 
@@ -95,7 +91,7 @@ public class UserControllerTest {
                 .andExpect(status().isOk()).andDo(print());
     }
 
-    /*@WithMockUser(authorities = {"ROLE_USER", "ROLE_ADMIN"})
+    @WithMockUser(authorities = {"ROLE_USER", "ROLE_ADMIN"})
     @Test
     void whenUpdateUser_returns201() throws Exception {
         System.out.println(user);
@@ -103,7 +99,7 @@ public class UserControllerTest {
                         .content(objectMapper.writeValueAsString(user))
                         .contentType("application/json"))
                 .andExpect(status().isCreated()).andDo(print());
-    }*/
+    }
     @Test
     void whenUpdateUser_returns401() throws Exception {
         System.out.println(user);
