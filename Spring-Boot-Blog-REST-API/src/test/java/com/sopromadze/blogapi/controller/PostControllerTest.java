@@ -338,4 +338,35 @@ public class PostControllerTest {
                 .andExpect(status().isOk());
     }
 
+    @Test
+    @DisplayName("Get post return 200")
+    void getPost_success() throws Exception {
+
+        Role rol = new Role();
+        rol.setName(RoleName.ROLE_ADMIN);
+
+        List<Role> roleList = Arrays.asList(rol);
+
+        User user = new User();
+        user.setId(1L);
+        user.setEmail("danieloliva@gmail.com");
+        user.setPassword("12345678");
+        user.setFirstName("Daniel");
+        user.setLastName("Oliva");
+        user.setRoles(roleList);
+
+        Post post = new Post();
+        post.setId(1L);
+        post.setUser(user);
+        post.setTitle("Viaje a Francia");
+
+        when(postServiceImpl.getPost(post.getId())).thenReturn(post);
+
+        mockMvc.perform(get("/api/posts/{id}",1L,1L)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(content().json(objectMapper.writeValueAsString(post)))
+                .andExpect(status().isOk());
+
+    }
+
 }
