@@ -7,6 +7,7 @@ import com.sopromadze.blogapi.model.Photo;
 import com.sopromadze.blogapi.model.role.Role;
 import com.sopromadze.blogapi.model.role.RoleName;
 import com.sopromadze.blogapi.model.user.User;
+import com.sopromadze.blogapi.payload.ApiResponse;
 import com.sopromadze.blogapi.payload.PagedResponse;
 import com.sopromadze.blogapi.payload.PhotoRequest;
 import com.sopromadze.blogapi.payload.PhotoResponse;
@@ -34,6 +35,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -421,5 +423,147 @@ class PhotoServiceImplTest {
         assertThrows(ResourceNotFoundException.class, ()->photoService.updatePhoto(3L, photoRequest, userPrincipal));
     }
 
+    @Test
+    void getAllPhotos_success() {
+
+        Album album = new Album();
+        album.setId(1L);
+        album.setTitle("Viaje de fin de curso");
+
+        Photo photo = new Photo();
+        photo.setId(1L);
+        photo.setTitle("Torre Eiffel");
+        photo.setUrl("https://media.tacdn.com/media/attractions-splice-spp-674x446/06/74/ab/3e.jpg");
+        photo.setThumbnailUrl("https://www.toureiffel.paris/sites/default/files/styles/1200x675/public/actualite/image_principale/IMG_20200526_123909.jpg?itok=DeDSW4xL");
+        photo.setAlbum(album);
+
+        Page<Photo> photoPage = new PageImpl<>(Arrays.asList(photo));
+        Page<Photo> photos = photoRepository.findAll(any(Pageable.class));
+
+        PhotoResponse photoResponse = new PhotoResponse(photo.getId(), photo.getTitle(), photo.getUrl(), photo.getThumbnailUrl(), photo.getAlbum().getId());
+
+        List<PhotoResponse> photoResponses = new ArrayList<>();
+        photoResponses.add(photoResponse);
+
+        when(photos).thenReturn(photoPage);
+
+        assertEquals(photoResponses, photoService.getAllPhotos(0, 10).getContent());
+
+    }
+
+    @Test
+    void getAllPhotosWithContentIsEmpty_success() {
+
+        Page<Photo> photoPage = new PageImpl<>(Arrays.asList());
+
+        Page<Photo> photos = photoRepository.findAll(any(Pageable.class));
+
+        PagedResponse<Photo> postPagedResponse = new PagedResponse<>();
+        postPagedResponse.setContent(photoPage.getContent());
+        postPagedResponse.setLast(true);
+        postPagedResponse.setTotalPages(1);
+
+        when(photos).thenReturn(photoPage);
+
+        assertEquals(postPagedResponse, photoService.getAllPhotos(0, 10));
+
+    }
+
+    @Test
+    void deletePhoto_success() {
+
+        Role admin = new Role();
+        admin.setId(1L);
+        admin.setName(RoleName.ROLE_ADMIN);
+        List<Role> listRole = new ArrayList<>();
+        listRole.add(admin);
+
+        Role usuario = new Role();
+        usuario.setId(2L);
+        usuario.setName(RoleName.ROLE_USER);
+        listRole.add(admin);
+
+        User user = new User();
+        user.setId(1L);
+        user.setEmail("danieloliva@gmail.com");
+        user.setPassword("12345678");
+        user.setFirstName("Daniel");
+        user.setLastName("Oliva");
+        user.setRoles(listRole);
+
+        UserPrincipal userPrincipal = UserPrincipal.create(user);
+
+        Album album = new Album();
+        album.setId(1L);
+        album.setTitle("Viaje de fin de curso");
+        album.setCreatedAt(Instant.now());
+        album.setUpdatedAt(Instant.now());
+        album.setUser(user);
+
+        Photo photo = new Photo();
+        photo.setId(1L);
+        photo.setTitle("Torre Eiffel");
+        photo.setUrl("https://media.tacdn.com/media/attractions-splice-spp-674x446/06/74/ab/3e.jpg");
+        photo.setThumbnailUrl("https://www.toureiffel.paris/sites/default/files/styles/1200x675/public/actualite/image_principale/IMG_20200526_123909.jpg?itok=DeDSW4xL");
+        photo.setAlbum(album);
+
+        when(photoRepository.findById(1L)).thenReturn(Optional.of(photo));
+
+        assertEquals(photo.getAlbum().getUser().getId(), userPrincipal.getId());
+
+        ApiResponse apiResponse = new ApiResponse(Boolean.TRUE, "Photo deleted successfully");
+
+        assertEquals(true,userPrincipal.getAuthorities().contains(new SimpleGrantedAuthority(RoleName.ROLE_ADMIN.toString())));
+        assertEquals(apiResponse, photoService.deletePhoto(1L, userPrincipal));
+
+    }
+
+    @Test
+    void deletePhoto_ResourceNotFoundException_success() {
+
+        Role admin = new Role();
+        admin.setId(1L);
+        admin.setName(RoleName.ROLE_ADMIN);
+        List<Role> listRole = new ArrayList<>();
+        listRole.add(admin);
+
+        Role usuario = new Role();
+        usuario.setId(2L);
+        usuario.setName(RoleName.ROLE_USER);
+        listRole.add(admin);
+
+        User user = new User();
+        user.setId(1L);
+        user.setEmail("danieloliva@gmail.com");
+        user.setPassword("12345678");
+        user.setFirstName("Daniel");
+        user.setLastName("Oliva");
+        user.setRoles(listRole);
+
+        UserPrincipal userPrincipal = UserPrincipal.create(user);
+
+        Album album = new Album();
+        album.setId(1L);
+        album.setTitle("Viaje de fin de curso");
+        album.setCreatedAt(Instant.now());
+        album.setUpdatedAt(Instant.now());
+        album.setUser(user);
+        albumRepository.save(album);
+
+        Photo photo = new Photo();
+        photo.setId(1L);
+        photo.setTitle("Torre Eiffel");
+        photo.setUrl("https://media.tacdn.com/media/attractions-splice-spp-674x446/06/74/ab/3e.jpg");
+        photo.setThumbnailUrl("https://www.toureiffel.paris/sites/default/files/styles/1200x675/public/actualite/image_principale/IMG_20200526_123909.jpg?itok=DeDSW4xL");
+        photo.setAlbum(album);
+        photoRepository.save(photo);
+
+        ApiResponse apiResponse = new ApiResponse(Boolean.FALSE, "Photo does not exist");
+
+        when(photoRepository.findById(2L)).thenReturn(Optional.of(photo));
+
+        assertThrows(ResourceNotFoundException.class, ()-> photoService.deletePhoto(1L, userPrincipal));
+
+    }
 
 }

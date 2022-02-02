@@ -5,6 +5,7 @@ import com.sopromadze.blogapi.model.Category;
 import com.sopromadze.blogapi.model.role.Role;
 import com.sopromadze.blogapi.model.role.RoleName;
 import com.sopromadze.blogapi.model.user.User;
+import com.sopromadze.blogapi.payload.ApiResponse;
 import com.sopromadze.blogapi.payload.PagedResponse;
 import com.sopromadze.blogapi.repository.CategoryRepository;
 import com.sopromadze.blogapi.repository.UserRepository;
@@ -164,6 +165,99 @@ public class CategoryServiceTest {
 
         ResponseEntity responseEntity = new ResponseEntity(category, HttpStatus.CREATED);
         assertEquals(responseEntity,categoryService.addCategory(category, userPrincipal));
+    }
+
+    @Test
+    void getCategory_success() {
+
+        Category category = new Category();
+        category.setId(1L);
+        category.setName("Viaje");
+
+        when(categoryRepository.findById(category.getId())).thenReturn(Optional.of(category));
+
+        assertEquals(category, categoryService.getCategory(category.getId()).getBody());
+
+    }
+
+    @Test
+    void getCategory_ResourceNotFoundException_success() {
+
+        Category category = new Category();
+        category.setId(1L);
+        category.setName("Viaje");
+
+        when(categoryRepository.findById(2L)).thenReturn(Optional.of(category));
+
+        assertThrows(ResourceNotFoundException.class, ()->categoryService.getCategory(category.getId()).getBody());
+
+    }
+
+    @Test
+    void deleteCategory_success() {
+
+        Role admin = new Role();
+        admin.setId(1L);
+        admin.setName(RoleName.ROLE_ADMIN);
+        List<Role> listRole = new ArrayList<>();
+        listRole.add(admin);
+
+        User user = new User();
+        user.setId(1L);
+        user.setEmail("danieloliva@gmail.com");
+        user.setPassword("12345678");
+        user.setFirstName("Daniel");
+        user.setLastName("Oliva");
+        user.setRoles(listRole);
+
+        UserPrincipal userPrincipal = UserPrincipal.create(user);
+
+        Category category = new Category();
+        category.setId(1L);
+        category.setName("Viaje");
+        category.setCreatedBy(1L);
+        category.setUpdatedBy(1L);
+
+        when(categoryRepository.findById(category.getId())).thenReturn(Optional.of(category));
+
+        ApiResponse apiResponse = new ApiResponse(Boolean.TRUE, "You successfully deleted category");
+
+        assertEquals(true,userPrincipal.getAuthorities().contains(new SimpleGrantedAuthority(RoleName.ROLE_ADMIN.toString())));
+        assertEquals(apiResponse, categoryService.deleteCategory(category.getId(), userPrincipal).getBody());
+
+    }
+
+    @Test
+    void deleteCategory_ResourceNotFoundException_success() {
+
+        Role admin = new Role();
+        admin.setId(1L);
+        admin.setName(RoleName.ROLE_ADMIN);
+        List<Role> listRole = new ArrayList<>();
+        listRole.add(admin);
+
+        User user = new User();
+        user.setId(1L);
+        user.setEmail("danieloliva@gmail.com");
+        user.setPassword("12345678");
+        user.setFirstName("Daniel");
+        user.setLastName("Oliva");
+        user.setRoles(listRole);
+
+        UserPrincipal userPrincipal = UserPrincipal.create(user);
+
+        Category category = new Category();
+        category.setId(1L);
+        category.setName("Viaje");
+        category.setCreatedBy(1L);
+        category.setUpdatedBy(1L);
+
+        when(categoryRepository.findById(2L)).thenReturn(Optional.of(category));
+
+        ApiResponse apiResponse = new ApiResponse(Boolean.TRUE, "You successfully deleted category");
+
+        assertThrows(ResourceNotFoundException.class, () -> categoryService.deleteCategory(category.getId(), userPrincipal).getBody());
+
     }
 
 }

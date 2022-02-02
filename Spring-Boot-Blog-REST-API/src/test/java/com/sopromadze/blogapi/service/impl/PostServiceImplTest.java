@@ -663,4 +663,63 @@ class PostServiceImplTest {
         assertThrows(ResourceNotFoundException.class, ()->postService.getPostsByCategory(3L, 1, 1));
 
     }
+
+    @Test
+    void getPost_success() {
+
+        Role rol = new Role();
+        rol.setName(RoleName.ROLE_ADMIN);
+
+        List<Role> roleList = Arrays.asList(rol);
+
+        User user = new User();
+        user.setId(1L);
+        user.setEmail("danieloliva@gmail.com");
+        user.setPassword("12345678");
+        user.setFirstName("Daniel");
+        user.setLastName("Oliva");
+        user.setRoles(roleList);
+
+        UserPrincipal userPrincipal = UserPrincipal.create(user);
+
+        Post post = new Post();
+        post.setId(1L);
+        post.setUser(user);
+        post.setTitle("Viaje a Francia");
+
+        when(postRepository.findById(1L)).thenReturn(Optional.of(post));
+
+        assertEquals(post, postService.getPost(post.getId()));
+
+    }
+
+    @Test
+    void getPost_ResourceNotFoundException_success() {
+
+        Role rol = new Role();
+        rol.setName(RoleName.ROLE_ADMIN);
+
+        List<Role> roleList = Arrays.asList(rol);
+
+        User user = new User();
+        user.setId(1L);
+        user.setEmail("danieloliva@gmail.com");
+        user.setPassword("12345678");
+        user.setFirstName("Daniel");
+        user.setLastName("Oliva");
+        user.setRoles(roleList);
+
+        UserPrincipal userPrincipal = UserPrincipal.create(user);
+
+        Post post = new Post();
+        post.setId(1L);
+        post.setUser(user);
+        post.setTitle("Viaje a Francia");
+
+        when(postRepository.findById(2L)).thenReturn(Optional.of(post));
+
+        assertThrows(ResourceNotFoundException.class, ()-> postService.getPost(post.getId()));
+
+    }
+
 }

@@ -474,4 +474,69 @@ public class TodoServiceTest {
         assertThrows(ResourceNotFoundException.class, () -> todoService.completeTodo(1L,userPrincipal));
     }
 
+    @Test
+    void getTodo_success() {
+
+        Role rol = new Role();
+        rol.setName(RoleName.ROLE_ADMIN);
+
+        List<Role> roleList = Arrays.asList(rol);
+
+        User user = new User();
+        user.setId(1L);
+        user.setEmail("danieloliva@gmail.com");
+        user.setPassword("12345678");
+        user.setFirstName("Daniel");
+        user.setLastName("Oliva");
+        user.setRoles(roleList);
+
+        UserPrincipal userPrincipal = UserPrincipal.create(user);
+
+        Todo todo = new Todo();
+        todo.setTitle("Título");
+        todo.setCreatedAt(Instant.now());
+        todo.setUpdatedAt(Instant.now());
+        todo.setUser(user);
+
+        when(userRepository.getUser(userPrincipal)).thenReturn(user);
+        when(todoRepository.findById(todo.getId())).thenReturn(Optional.of(todo));
+
+        assertEquals(true,userPrincipal.getAuthorities().contains(new SimpleGrantedAuthority(RoleName.ROLE_ADMIN.toString())));
+        assertEquals(todo, todoService.getTodo(todo.getId(), userPrincipal));
+
+    }
+
+    @Test
+    void getTodo_ResourceNotFoundException_success() {
+
+        Role rol = new Role();
+        rol.setName(RoleName.ROLE_ADMIN);
+
+        List<Role> roleList = Arrays.asList(rol);
+
+        User user = new User();
+        user.setId(1L);
+        user.setEmail("danieloliva@gmail.com");
+        user.setPassword("12345678");
+        user.setFirstName("Daniel");
+        user.setLastName("Oliva");
+        user.setRoles(roleList);
+        userRepository.save(user);
+
+        UserPrincipal userPrincipal = UserPrincipal.create(user);
+
+        Todo todo = new Todo();
+        todo.setTitle("Título");
+        todo.setCreatedAt(Instant.now());
+        todo.setUpdatedAt(Instant.now());
+        todo.setUser(user);
+
+        when(userRepository.getUser(userPrincipal)).thenReturn(user);
+        when(todoRepository.findById(2L)).thenReturn(Optional.of(todo));
+
+        assertEquals(true,userPrincipal.getAuthorities().contains(new SimpleGrantedAuthority(RoleName.ROLE_ADMIN.toString())));
+        assertThrows(ResourceNotFoundException.class, () -> todoService.getTodo(todo.getId(), userPrincipal));
+
+    }
+
 }
